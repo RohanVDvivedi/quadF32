@@ -4,6 +4,8 @@
 
 #include<stdint.h>
 
+#include<uart/uart.h>
+
 #define RCC_BASE 0x40021000
 #define RCC_APB2ENR (*((volatile uint32_t*)(RCC_BASE + 0x18)))
 
@@ -22,6 +24,7 @@ void delay_for(volatile int clocks)
 
 void main(void)
 {
+	uart_init();
 	RCC_APB2ENR |= (1<<4);
 	GPIOC_CRH   &= 0xFF0FFFFF;
 	GPIOC_CRH   |= 0x00200000;
@@ -32,4 +35,5 @@ void main(void)
 		GPIOC_ODR &= (~(1 << 13));
 		delay_for(1000000);
 	}
+	uart_destroy();
 }

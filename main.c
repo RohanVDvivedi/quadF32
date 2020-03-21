@@ -24,16 +24,28 @@ void delay_for(volatile int clocks)
 
 void main(void)
 {
-	uart_init();
-	RCC_APB2ENR |= (1<<4);
+	RCC_APB2ENR |= ((1<<14) | (1<<4) | (1<<0));
 	GPIOC_CRH   &= 0xFF0FFFFF;
 	GPIOC_CRH   |= 0x00200000;
+
+		GPIOC_ODR |= (1 << 13);
+		delay_for(1000000);
+		GPIOC_ODR &= (~(1 << 13));
+		delay_for(1000000);
+	uart_init(57600);
+		GPIOC_ODR |= (1 << 13);
+		delay_for(1000000);
+		GPIOC_ODR &= (~(1 << 13));
+		delay_for(1000000);
 	while(1)
 	{
 		GPIOC_ODR |= (1 << 13);
 		delay_for(1000000);
 		GPIOC_ODR &= (~(1 << 13));
 		delay_for(1000000);
+		
+		uart_write_byte('H');
+		uart_write_byte('i');
+		uart_write_byte('\n');
 	}
-	uart_destroy();
 }

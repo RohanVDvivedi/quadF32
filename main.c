@@ -51,7 +51,7 @@ void main(void)
 
 	RCC_APB2ENR |= ((1<<14) | (1<<2) | (1<<0));
 	GPIOA_CRH   &= 0xFFFFF00F;
-	GPIOA_CRH   |= 0x000004d0;
+	GPIOA_CRH   |= 0x000004b0;
 
 	uart_init(9600);
 

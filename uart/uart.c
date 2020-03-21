@@ -20,7 +20,7 @@ int uart_init(uint32_t baud_rate)
 	double USART_DIV = 72000000.0/(16.0 * baud_rate);
 	uint32_t BRR_val = (((uint32_t)USART_DIV) << 4) + ((uint32_t)((USART_DIV-((double)((uint32_t)USART_DIV))) * 16));
 
-	*USART_BRRx = 0x341;
+	*USART_BRRx = BRR_val;
 
 	*USART_CR1x |= ((1<<13) | (1<<3) | (1<<2));
 }

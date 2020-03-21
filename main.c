@@ -16,8 +16,8 @@
 #define GPIOC_ODR (*((volatile uint32_t*)(GPIOC_BASE + 0x0c)))
 
 #define GPIOA_BASE 0x40010800
-#define GPIOA_CRH (*((volatile uint32_t*)(GPIOC_BASE + 0x04)))
-#define GPIOA_ODR (*((volatile uint32_t*)(GPIOC_BASE + 0x0c)))
+#define GPIOA_CRH (*((volatile uint32_t*)(GPIOA_BASE + 0x04)))
+#define GPIOA_ODR (*((volatile uint32_t*)(GPIOA_BASE + 0x0c)))
 
 void delay_for(volatile int clocks)
 {
@@ -45,15 +45,15 @@ void main(void)
     while ((RCC_CFGR & 0x00000008) == 0); /* wait for it to come on */
 
 
-	RCC_APB2ENR |= ((1<<14) | (1<<4) | (1<<2) | (1<<0));
-
+	RCC_APB2ENR |= (1<<4);
 	GPIOC_CRH   &= 0xFF0FFFFF;
 	GPIOC_CRH   |= 0x00200000;
 
+	RCC_APB2ENR |= ((1<<14) | (1<<2) | (1<<0));
 	GPIOA_CRH   &= 0xFFFFF00F;
 	GPIOA_CRH   |= 0x000004d0;
 
-	uart_init(57600);
+	uart_init(9600);
 
 	char c = 'X';
 

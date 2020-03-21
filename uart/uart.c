@@ -14,8 +14,10 @@ int uart_init(uint32_t baud_rate)
 {
 	volatile uint32_t* USART_BRRx = USART + USART_BRR;
 	volatile uint32_t* USART_CR1x = USART + USART_CR1;
+	volatile uint32_t* USART_CR2x = USART + USART_CR2;
+	volatile uint32_t* USART_CR3x = USART + USART_CR3;
 
-	//*USART_CR1x &= (~(1<<12));
+	*USART_CR1x &= (~(1<<12));
 
 	double USART_DIV = 72000000.0/(16.0 * baud_rate);
 	uint32_t BRR_val = (((uint32_t)USART_DIV) << 4) + ((uint32_t)((USART_DIV-((double)((uint32_t)USART_DIV))) * 16));

@@ -15,10 +15,6 @@
 #define GPIOC_CRH (*((volatile uint32_t*)(GPIOC_BASE + 0x04)))
 #define GPIOC_ODR (*((volatile uint32_t*)(GPIOC_BASE + 0x0c)))
 
-#define GPIOA_BASE 0x40010800
-#define GPIOA_CRH (*((volatile uint32_t*)(GPIOA_BASE + 0x04)))
-#define GPIOA_ODR (*((volatile uint32_t*)(GPIOA_BASE + 0x0c)))
-
 void delay_for(volatile int clocks)
 {
 	while(clocks--)
@@ -31,32 +27,30 @@ void delay_for(volatile int clocks)
 
 void main(void)
 {
-	/* enable HSE */
+	/*
+	// enable HSE
     RCC_CR = RCC_CR | 0x00010001;
-    while ((RCC_CR & 0x00020000) == 0); /* for it to come on */
-    /* enable flash prefetch buffer */
+    while ((RCC_CR & 0x00020000) == 0); // for it to come on 
+    // enable flash prefetch buffer 
     FLASH_ACR = 0x00000012;
-    /* Configure PLL */
-    RCC_CFGR = RCC_CFGR | 0x001D0400; /* pll=72Mhz,APB1=36Mhz,AHB=72Mhz */
-    RCC_CR = RCC_CR | 0x01000000; /* enable the pll */
-    while ((RCC_CR & 0x03000000) == 0);         /* wait for it to come on */
-    /* Set SYSCLK as PLL */
+    // Configure PLL 
+    RCC_CFGR = RCC_CFGR | 0x001D0400; // pll=72Mhz,APB1=36Mhz,AHB=72Mhz 
+    RCC_CR = RCC_CR | 0x01000000; // enable the pll 
+    while ((RCC_CR & 0x03000000) == 0);         // wait for it to come on 
+    // Set SYSCLK as PLL 
     RCC_CFGR = RCC_CFGR | 0x00000002;
-    while ((RCC_CFGR & 0x00000008) == 0); /* wait for it to come on */
+    while ((RCC_CFGR & 0x00000008) == 0); // wait for it to come on 
+    */
 
 
 	RCC_APB2ENR |= (1<<4);
+
 	GPIOC_CRH   &= 0xFF0FFFFF;
 	GPIOC_CRH   |= 0x00200000;
-
-	RCC_APB2ENR |= ((1<<14) | (1<<2) | (1<<0));
-	GPIOA_CRH   &= 0xFFFFF00F;
-	GPIOA_CRH   |= 0x000004b0;
 
 	uart_init(9600);
 
 	char c = 'X';
-
 	while(c = uart_read_byte())
 	{
 		GPIOC_ODR |= (1 << 13);

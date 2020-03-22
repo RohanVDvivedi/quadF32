@@ -1,8 +1,6 @@
-/*
-	A simple blink program built for stm32f103 on a blue pill board or alike
-*/
-
 #include<stdint.h>
+
+
 
 #include<uart/uart.h>
 

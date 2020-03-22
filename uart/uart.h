@@ -1,9 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
-#include<stdint.h>
-
 #include<regs/gpio.h>
+#include<regs/usart.h>
 
 int uart_init();
 

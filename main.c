@@ -1,7 +1,4 @@
-#include<stdint.h>
-
 #include<regs/gpio.h>
-
 
 #include<uart/uart.h>
 

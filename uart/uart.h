@@ -3,6 +3,8 @@
 
 #include<stdint.h>
 
+#include<regs/gpio.h>
+
 int uart_init();
 
 void uart_write_byte(char byte);

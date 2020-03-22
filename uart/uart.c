@@ -3,10 +3,6 @@
 #define RCC_BASE 0x40021000
 #define RCC_APB2ENR (*((volatile uint32_t*)(RCC_BASE + 0x18)))
 
-#define GPIOA_BASE 0x40010800
-#define GPIOA_CRH (*((volatile uint32_t*)(GPIOA_BASE + 0x04)))
-#define GPIOA_ODR (*((volatile uint32_t*)(GPIOA_BASE + 0x0c)))
-
 #define USART 			0x40013800
 
 #define USART_SR		0x00
@@ -24,8 +20,8 @@ int uart_init(uint32_t baud_rate)
 
 	RCC_APB2ENR |= ((1<<14) | (1<<2));
 
-	GPIOA_CRH   &= 0xFFFFF00F;
-	GPIOA_CRH   |= 0x000004B0;
+	GPIOA->GPIO_CRH   &= 0xFFFFF00F;
+	GPIOA->GPIO_CRH   |= 0x000004B0;
 
 	double USART_DIV = 72000000.0/(16.0 * baud_rate);
 	uint32_t BRR_val = (((uint32_t)USART_DIV) << 4) + ((uint32_t)((USART_DIV-((double)((uint32_t)USART_DIV))) * 16));

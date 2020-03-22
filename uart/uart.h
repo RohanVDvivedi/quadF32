@@ -1,6 +1,7 @@
 #ifndef UART_H
 #define UART_H
 
+#include<regs/rcc.h>
 #include<regs/gpio.h>
 #include<regs/usart.h>
 

@@ -29,11 +29,22 @@ void main(void)
 
 		char data[30] = "Hello World, you sent me X\n";
 		data[25] = c;
-		uart_write_blocking(data, 27);
 
-		uart_write_through_dma("Hello from DMA\n", 15);
+		if('A' <= c && c <= 'Z')
+		{
+			uart_write_blocking(data, 27);
+		}
+		else if('a' <= c && c <= 'z')
+		{
+			uart_write_through_dma(data, 27);
+		}
+		else
+		{
+			uart_write_blocking(data, 27);
+			uart_write_through_dma(data, 27);
+		}
 
-		delay_for(500000);
+		//delay_for(500000);
 
 		GPIOC->GPIO_ODR |= (1 << 13);
 	}

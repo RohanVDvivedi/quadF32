@@ -1,5 +1,7 @@
 #include<uart/uart.h>
 
+char tx_buffer[32] = "Hello DMA init\n";
+
 int uart_init(uint32_t baud_rate)
 {
 	RCC->RCC_APB2ENR |= ((1<<14) | (1<<2));
@@ -8,11 +10,10 @@ int uart_init(uint32_t baud_rate)
 	GPIOA->GPIO_CRH   &= 0xFFFFF00F;
 	GPIOA->GPIO_CRH   |= 0x000004B0;
 
+	USART1->USART_CR1 |= (1<<13);
 	USART1->USART_BRR = 8000000/baud_rate;
-
-	USART1->USART_CR3 |= (1<7);
-	
-	USART1->USART_CR1 |= ((1<<13) | (1<<3) | (1<<2));
+	USART1->USART_CR3 |= (1<<7);
+	USART1->USART_CR1 |= ((1<<3) | (1<<2));
 }
 
 void uart_write_byte(char byte)
@@ -38,18 +39,15 @@ void uart_write_blocking(char* str, unsigned int bytes_to_write)
 
 void uart_write_through_dma(char* str, unsigned int bytes_to_write)
 {
-	while(!(USART1->USART_SR & (1<<7))){}
+	while(!(USART1->USART_SR & (1<<6))){}
 	while(DMA1_CHANNEL(4).DMA_CNDTR){}
 
 	DMA1_CHANNEL(4).DMA_CCR &= ~(1<<0);
-
+	DMA1_CHANNEL(4).DMA_CCR = 0x3090;
 	DMA1_CHANNEL(4).DMA_CPAR = (uint32_t)(&(USART1->USART_DR));
 	DMA1_CHANNEL(4).DMA_CMAR = ((uint32_t)str);
 	DMA1_CHANNEL(4).DMA_CNDTR = bytes_to_write;
-	DMA1_CHANNEL(4).DMA_CCR |= ((3<<12) | (1<<7) | (1<<4));
-
 	USART1->USART_SR &= ~(1<<6);
-
 	DMA1_CHANNEL(4).DMA_CCR |= (1<<0);
 }
 

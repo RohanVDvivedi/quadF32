@@ -24,8 +24,13 @@ char uart_read_byte()
 	return USART1->USART_DR;
 }
 
-int uart_write(char* str, unsigned int bytes_to_write)
+void uart_write_blocking(char* str, unsigned int bytes_to_write)
 {
+	unsigned int i = 0;
+	while(i < bytes_to_write)
+	{
+		uart_write_byte(str[i++]);
+	}
 }
 
 int uart_read(char* str, unsigned int bytes_to_read)

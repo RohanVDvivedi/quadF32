@@ -27,12 +27,9 @@ void main(void)
 	{
 		GPIOC->GPIO_ODR &= (~(1 << 13));
 
-		uart_write_byte('H');
-		uart_write_byte('i');
-		uart_write_byte(' ');
-		uart_write_byte(c);
-		uart_write_byte('\r');
-		uart_write_byte('\n');
+		char data[30] = "Hello World, you sent me X\n";
+		data[25] = c;
+		uart_write_blocking(data, 27);
 
 		delay_for(500000);
 

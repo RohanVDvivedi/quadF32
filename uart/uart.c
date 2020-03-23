@@ -39,13 +39,14 @@ void uart_write_blocking(char* str, unsigned int bytes_to_write)
 void uart_write_through_dma(char* str, unsigned int bytes_to_write)
 {
 	while(!(USART1->USART_SR & (1<<7))){}
+	while(DMA1_CHANNEL(4).DMA_CNDTR){}
 
-	DMA1_CHANNEL(4).DMA_CCR = 0;
-	DMA1_CHANNEL(4).DMA_CCR |= ((3<<12) | (1<<7) | (1<<4));
+	DMA1_CHANNEL(4).DMA_CCR &= ~(1<<0);
 
-	DMA1_CHANNEL(4).DMA_CNDTR = bytes_to_write;
 	DMA1_CHANNEL(4).DMA_CPAR = (uint32_t)(&(USART1->USART_DR));
 	DMA1_CHANNEL(4).DMA_CMAR = ((uint32_t)str);
+	DMA1_CHANNEL(4).DMA_CNDTR = bytes_to_write;
+	DMA1_CHANNEL(4).DMA_CCR |= ((3<<12) | (1<<7) | (1<<4));
 
 	USART1->USART_SR &= ~(1<<6);
 

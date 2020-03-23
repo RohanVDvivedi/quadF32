@@ -21,8 +21,7 @@ enum clk_source
 {
 	HSI = 0x00,
 	HSE = 0x01,
-	HSI_WITH_PLL = 0x10,
-	HSE_WITH_PLL = 0x11
+	PLL = 0x10
 };
 
 void change_sys_clock_source(clk_source source, uint32_t frequency);

@@ -14,8 +14,8 @@ int uart_init(uint32_t baud_rate)
 
 void uart_write_byte(char byte)
 {
-	USART1->USART_DR = byte & 0xff;
 	while(!(USART1->USART_SR & (1<<7))){}
+	USART1->USART_DR = byte & 0xff;
 }
 
 char uart_read_byte()
@@ -31,6 +31,18 @@ void uart_write_blocking(char* str, unsigned int bytes_to_write)
 	{
 		uart_write_byte(str[i++]);
 	}
+}
+
+void uart_write_through_dma(char* str, unsigned int bytes_to_write)
+{
+	DMA1_CHANNEL(4).DMA_CCR = 0;
+	DMA1_CHANNEL(4).DMA_CCR |= ((3<<12) | (1<<4));
+
+	DMA1_CHANNEL(4).DMA_CNDTR = bytes_to_write;
+	DMA1_CHANNEL(4).DMA_CPAR = (uint32_t)(&(USART1->USART_DR));
+	DMA1_CHANNEL(4).DMA_CMAR = ((uint32_t)str);
+
+	DMA1_CHANNEL(4).DMA_CCR |= (1<<0);
 }
 
 int uart_read(char* str, unsigned int bytes_to_read)

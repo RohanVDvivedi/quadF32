@@ -4,6 +4,7 @@
 #include<regs/rcc.h>
 #include<regs/gpio.h>
 #include<regs/usart.h>
+#include<regs/dma.h>
 
 int uart_init();
 

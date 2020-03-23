@@ -31,7 +31,7 @@ void main(void)
 		data[25] = c;
 		uart_write_blocking(data, 27);
 
-		//uart_write_through_dma("Hello from DMA\n", 15);
+		uart_write_through_dma("Hello from DMA\n", 15);
 
 		delay_for(500000);
 

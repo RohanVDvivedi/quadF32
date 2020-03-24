@@ -1,7 +1,9 @@
 #ifndef I2C_H
 #define I2C_H
 
-#include<stdint.h>
+#include<regs/gpio.h>
+#include<regs/i2c.h>
+#include<regs/dma.h>
 
 int i2c_init();
 

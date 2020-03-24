@@ -49,10 +49,8 @@ void turn_off_PLL_clk()
 void change_clk(clk_source source)
 {
 	uint32_t new_clk_src = source & 0x3;
-	uint32_t temp = RCC->RCC_CFGR;
-	temp &= (~0x3);
-	RCC->RCC_CFGR = temp & new_clk_src;
-	while( (RCC->RCC_CFGR>>2)&0x3 != new_clk_src ){}
+	RCC->RCC_CFGR = (RCC->RCC_CFGR & (~0x3)) | new_clk_src;
+	while(((RCC->RCC_CFGR>>2) & 0x3) != new_clk_src){}
 }
 
 void change_sys_clock_source(clk_source source, uint32_t frequency)

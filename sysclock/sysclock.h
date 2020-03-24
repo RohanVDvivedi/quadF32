@@ -20,9 +20,9 @@
 typedef enum clk_source clk_source;
 enum clk_source
 {
-	HSI = 0x00,
-	HSE = 0x01,
-	PLL = 0x10
+	HSI = 0x0,
+	HSE = 0x1,
+	PLL = 0x2
 };
 
 void setup_pll_module(clk_source source, uint32_t frequency);

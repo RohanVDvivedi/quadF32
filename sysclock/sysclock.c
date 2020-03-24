@@ -1,15 +1,5 @@
 #include<sysclock/sysclock.h>
 
-#include<regs/gpio.h>
-
-static void delay_for(volatile int clocks)
-{
-	while(clocks--)
-	{
-		asm("nop");
-	}
-}
-
 void turn_on_HSE_clk()
 {
 	RCC->RCC_CR |= (1<<16);
@@ -101,6 +91,10 @@ void change_sys_clock_source(clk_source source, uint32_t frequency)
 	{
 		frequency = 72000000;
 	}
+	
+	// increse the wait states to 2, so that we may not be reading false data from Flash memory
+	FLASH_ACR = (FLASH_ACR & ~(0x7)) | 0x2;
+
 	switch(source)
 	{
 		case HSI:

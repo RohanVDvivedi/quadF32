@@ -32,6 +32,8 @@ void stringify_32(char* num, uint32_t n)
 	}
 }
 
+uint32_t r = 0;
+
 void main(void)
 {
 	change_sys_clock_source(HSE, 8000000);
@@ -46,13 +48,17 @@ void main(void)
 
 	uart_init(9600);
 
+	char details[30] = "r => 0x********\n";
+	stringify_32(details + 5, r);
+	uart_write_blocking(details, 16);
+
 	while(1)
 	{
-		char c = uart_read_byte();
+		//char c = uart_read_byte();
 
 		GPIOC->GPIO_ODR &= (~(1 << 13));
 
-		if(c == 'c')
+		/*if(c == 'c')
 		{
 			char clock_details[30] = "X => 0x********\n";
 
@@ -80,12 +86,12 @@ void main(void)
 				uart_write_blocking(data, 27);
 				uart_write_through_dma(data, 27);
 			}
-		}
+		}*/
 
-		//delay_for(500000);
+		delay_for(500000);
 
 		GPIOC->GPIO_ODR |= (1 << 13);
 
-		//delay_for(500000);
+		delay_for(500000);
 	}
 }

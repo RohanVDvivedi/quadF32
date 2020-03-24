@@ -6,6 +6,8 @@
 #include<regs/usart.h>
 #include<regs/dma.h>
 
+#include<sysclock/sysclock.h>
+
 int uart_init();
 
 void uart_write_byte(char byte);

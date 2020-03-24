@@ -12,6 +12,26 @@ void delay_for(volatile int clocks)
 	}
 }
 
+void stringify_32(char* num, uint32_t n)
+{
+	int j = 0; int i = 0;
+	num[j++] = '0';
+	num[j++] = 'x';
+	for(i = 1; i <= 8; i++, j++)
+	{
+		num[j] = (char)((n>>((8-i)*4))&0x0f);
+		if(num[j] <= 0x09)
+		{
+			num[j] += '0';
+		}
+		else if(num[j] <= 0x0f)
+		{
+			num[j] -= 0x0a;
+			num[j] += 'A';
+		}
+	}
+}
+
 void main(void)
 {
 	change_sys_clock_source(HSE, 8000000);
@@ -28,38 +48,44 @@ void main(void)
 
 	while(1)
 	{
-		//char c = uart_read_byte();
+		char c = uart_read_byte();
 
-		uint32_t clock_source = get_sys_clock_source() + 1;
-		while(clock_source > 0){
 		GPIOC->GPIO_ODR &= (~(1 << 13));
 
-		/*char data[30] = "Hello World, you sent me X\n";
-		data[25] = c;
+		if(c == 'c')
+		{
+			char clock_details[30] = "X => 0x********\n";
 
-		if('A' <= c && c <= 'Z')
-		{
-			uart_write_blocking(data, 27);
-		}
-		else if('a' <= c && c <= 'z')
-		{
-			uart_write_through_dma(data, 27);
+			clock_details[0] = '0' + (((char)get_sys_clock_source())&0xff);
+			stringify_32(clock_details + 5, get_sys_clock_frequency());
+
+			uart_write_blocking(clock_details, 16);
+			uart_write_through_dma(clock_details, 16);
 		}
 		else
 		{
-			data[25] = '0' + (((char)get_sys_clock_source())&0xff);
-			uart_write_blocking(data, 27);
-			uart_write_through_dma(data, 27);
-		}*/
+			char data[30] = "Hello World, you sent me X\n";
+			data[25] = c;
 
-		delay_for(500000);
+			if('A' <= c && c <= 'Z')
+			{
+				uart_write_blocking(data, 27);
+			}
+			else if('a' <= c && c <= 'z')
+			{
+				uart_write_through_dma(data, 27);
+			}
+			else
+			{
+				uart_write_blocking(data, 27);
+				uart_write_through_dma(data, 27);
+			}
+		}
+
+		//delay_for(500000);
 
 		GPIOC->GPIO_ODR |= (1 << 13);
 
-		delay_for(500000);
-		clock_source--;
-		}
-
-		delay_for(500000 * 5);
+		//delay_for(500000);
 	}
 }

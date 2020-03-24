@@ -176,7 +176,7 @@ uint32_t get_sys_clock_frequency()
 		{
 			if(!(RCC->RCC_CFGR & (1<<16)))
 			{
-				return (HSI_CLOCK/2) * ((RCC->CFGR>>18)&0xf);
+				return (HSI_CLOCK/2) * ((RCC->RCC_CFGR>>18)&0xf);
 			}
 			else
 			{
@@ -185,7 +185,7 @@ uint32_t get_sys_clock_frequency()
 				{
 					HSE_PLL_INPUT_FREQUENCY /= 2;
 				}
-				return (HSE_PLL_INPUT_FREQUENCY/2) * ((RCC->CFGR>>18)&0xf);
+				return (HSE_PLL_INPUT_FREQUENCY/2) * ((RCC->RCC_CFGR>>18)&0xf);
 			}
 		}
 	}

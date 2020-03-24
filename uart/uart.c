@@ -11,7 +11,7 @@ int uart_init(uint32_t baud_rate)
 	GPIOA->GPIO_CRH   |= 0x000004B0;
 
 	USART1->USART_CR1 |= (1<<13);
-	USART1->USART_BRR = get_sys_clock_frequency()/baud_rate;
+	USART1->USART_BRR = ((uint32_t)get_sys_clock_frequency())/baud_rate;
 	USART1->USART_CR3 |= (1<<7);
 	USART1->USART_CR1 |= ((1<<3) | (1<<2));
 }

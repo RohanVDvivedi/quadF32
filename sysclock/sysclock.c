@@ -91,7 +91,7 @@ void change_sys_clock_source(clk_source source, uint32_t frequency)
 	{
 		frequency = 72000000;
 	}
-	
+
 	// increse the wait states to 2, so that we may not be reading false data from Flash memory
 	FLASH_ACR = (FLASH_ACR & ~(0x7)) | 0x2;
 
@@ -168,9 +168,15 @@ uint32_t get_sys_clock_frequency()
 		}
 		case PLL :
 		{
+			uint32_t multiplication_factor = ((RCC->RCC_CFGR>>18) & 0xf);
+			if(multiplication_factor == 0xf)
+			{
+				multiplication_factor = 0xe;
+			}
+			multiplication_factor += 2;
 			if(!(RCC->RCC_CFGR & (1<<16)))
 			{
-				return (HSI_CLOCK/2) * ((RCC->RCC_CFGR>>18)&0xf);
+				return (HSI_CLOCK/2) * multiplication_factor;
 			}
 			else
 			{
@@ -179,7 +185,7 @@ uint32_t get_sys_clock_frequency()
 				{
 					HSE_PLL_INPUT_FREQUENCY /= 2;
 				}
-				return (HSE_PLL_INPUT_FREQUENCY/2) * ((RCC->RCC_CFGR>>18)&0xf);
+				return HSE_PLL_INPUT_FREQUENCY * multiplication_factor;
 			}
 		}
 	}

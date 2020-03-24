@@ -15,6 +15,8 @@ void delay_for(volatile int clocks)
 void main(void)
 {
 	change_sys_clock_source(HSE, 8000000);
+	setup_pll_module(HSE, 72000000);
+	change_sys_clock_source(PLL, 72000000);
 
 	RCC->RCC_APB2ENR |= (1<<4);
 
@@ -26,11 +28,13 @@ void main(void)
 
 	while(1)
 	{
-		char c = uart_read_byte();
+		//char c = uart_read_byte();
 
+		uint32_t clock_source = get_sys_clock_source() + 1;
+		while(clock_source > 0){
 		GPIOC->GPIO_ODR &= (~(1 << 13));
 
-		char data[30] = "Hello World, you sent me X\n";
+		/*char data[30] = "Hello World, you sent me X\n";
 		data[25] = c;
 
 		if('A' <= c && c <= 'Z')
@@ -41,25 +45,21 @@ void main(void)
 		{
 			uart_write_through_dma(data, 27);
 		}
-		else if(c == '-')
-		{
-			change_sys_clock_source(HSE, 8000000);
-		}
-		else if(c == '+')
-		{
-			change_sys_clock_source(HSI, 8000000);
-		}
 		else
 		{
 			data[25] = '0' + (((char)get_sys_clock_source())&0xff);
 			uart_write_blocking(data, 27);
 			uart_write_through_dma(data, 27);
-		}
+		}*/
 
-		//delay_for(500000);
+		delay_for(500000);
 
 		GPIOC->GPIO_ODR |= (1 << 13);
 
-		//delay_for(500000);
+		delay_for(500000);
+		clock_source--;
+		}
+
+		delay_for(500000 * 5);
 	}
 }

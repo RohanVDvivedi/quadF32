@@ -2,6 +2,7 @@
 #define SYS_CLOCK_H
 
 #include<regs/rcc.h>
+#include<regs/flash_control.h>
 
 // the oscillator connected to the controller on my board
 // change this as it suits your needs
@@ -14,7 +15,7 @@
 #define MAX_APB2_CLOCK 72000000
 #define MAX_APB1_CLOCK 36000000
 
-#define MAX_SYS_CLOCK 
+#define MAX_SYS_CLOCK 72000000
 
 typedef enum clk_source clk_source;
 enum clk_source
@@ -23,6 +24,8 @@ enum clk_source
 	HSE = 0x01,
 	PLL = 0x10
 };
+
+void setup_pll_module(clk_source source, uint32_t frequency);
 
 void change_sys_clock_source(clk_source source, uint32_t frequency);
 

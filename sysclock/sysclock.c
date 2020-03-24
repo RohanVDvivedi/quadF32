@@ -46,6 +46,48 @@ void turn_off_PLL_clk()
 	while(RCC->RCC_CR & (1<<25)){}
 }
 
+void setup_pll_module(clk_source source, uint32_t frequency)
+{
+	if(frequency > 72000000)
+	{
+		frequency = 72000000;
+	}
+	turn_off_PLL_clk();
+	switch(source)
+	{
+		case HSE :
+		{
+			RCC->RCC_CFGR &= ~(1<<17);
+			RCC->RCC_CFGR |= (1<<16);
+			uint32_t multiplication_factor_field = (frequency/HSE_CLOCK)-2;
+			if(multiplication_factor_field > 0xe)
+			{
+				multiplication_factor_field = 0xe;
+			}
+			RCC->RCC_CFGR &= ~(0xf<<18);
+			RCC->RCC_CFGR |= (multiplication_factor_field<<18);
+			break;
+		}
+		case HSI :
+		{
+			RCC->RCC_CFGR &= ~(1<<17);
+			RCC->RCC_CFGR &= ~(1<<16);
+			uint32_t multiplication_factor_field = (frequency/(HSI_CLOCK/2))-2;
+			if(multiplication_factor_field > 0xe)
+			{
+				multiplication_factor_field = 0xe;
+			}
+			RCC->RCC_CFGR &= ~(0xf<<18);
+			RCC->RCC_CFGR |= (multiplication_factor_field<<18);
+			break;
+		}
+		default :
+		{
+			break;
+		}
+	}
+}
+
 void change_clk(clk_source source)
 {
 	uint32_t new_clk_src = source & 0x3;
@@ -55,6 +97,10 @@ void change_clk(clk_source source)
 
 void change_sys_clock_source(clk_source source, uint32_t frequency)
 {
+	if(frequency > 72000000)
+	{
+		frequency = 72000000;
+	}
 	switch(source)
 	{
 		case HSI:
@@ -71,6 +117,8 @@ void change_sys_clock_source(clk_source source, uint32_t frequency)
 		}
 		case PLL:
 		{
+			turn_on_PLL_clk();
+			change_clk(PLL);
 			break;
 		}
 	}
@@ -87,14 +135,61 @@ void change_sys_clock_source(clk_source source, uint32_t frequency)
 		RCC->RCC_CFGR &= ~(0x7<<11);
 		RCC->RCC_CFGR &= ~(0xf<<4);
 	}
+
+	// setup flash according to the new frequency
+	if(frequency <= 24000000)
+	{
+		if(!(RCC->RCC_CFGR & (1<<13)))
+		{
+			FLASH_ACR |= (1<<4);
+		}
+		FLASH_ACR &= ~(0x7);
+	}
+	else if(24000000 < frequency && frequency <= 48000000)
+	{
+		FLASH_ACR = (FLASH_ACR & ~(0x7)) | 0x1;
+	}
+	else if(48000000 < frequency && frequency <= 72000000)
+	{
+		FLASH_ACR = (FLASH_ACR & ~(0x7)) | 0x2;
+	}
 }
 
 clk_source get_sys_clock_source()
 {
-	return RCC->RCC_CFGR>>2;
+	return (RCC->RCC_CFGR>>2) & 0x3;
 }
 
-uint32_t get_sys_clock_frequency();
+uint32_t get_sys_clock_frequency()
+{
+	switch(get_sys_clock_source())
+	{
+		case HSI :
+		{
+			return HSI_CLOCK;
+		}
+		case HSE :
+		{
+			return HSE_CLOCK;
+		}
+		case PLL :
+		{
+			if(!(RCC->RCC_CFGR & (1<<16)))
+			{
+				return (HSI_CLOCK/2) * ((RCC->CFGR>>18)&0xf);
+			}
+			else
+			{
+				uint32_t HSE_PLL_INPUT_FREQUENCY = HSE_CLOCK;
+				if(RCC->RCC_CFGR & (1<<17))
+				{
+					HSE_PLL_INPUT_FREQUENCY /= 2;
+				}
+				return (HSE_PLL_INPUT_FREQUENCY/2) * ((RCC->CFGR>>18)&0xf);
+			}
+		}
+	}
+}
 
 uint32_t get_AHB_clock_frequency();
 

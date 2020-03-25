@@ -3,12 +3,41 @@
 
 #include<sysclock/sysclock.h>
 #include<uart/uart.h>
+#include<i2c/i2c.h>
 
 void delay_for(volatile int clocks)
 {
 	while(clocks--)
 	{
 		asm("nop");
+	}
+}
+
+char hex_to_char(uint8_t n)
+{
+	if(0x0 <= n && n <= 0x9)
+	{
+		return n + '0';
+	}
+	else if(0xa <= n && n <= 0xf)
+	{
+		return n - 0xa + 'a';
+	}
+}
+
+uint8_t char_to_hex(char c)
+{
+	if('0' <= c && c <= '9')
+	{
+		return c - '0';
+	}
+	else if('a' <= c && c <= 'f')
+	{
+		return c - 'a' + 0xa;
+	}
+	else if('A' <= c && c <= 'F')
+	{
+		return c - 'A' + 0xa;
 	}
 }
 
@@ -32,7 +61,44 @@ void stringify_32(char* num, uint32_t n)
 	}
 }
 
-uint32_t r = 0;
+uint32_t numify_32(char* num)
+{
+	uint32_t n = 0;
+	int state = -2;
+	int i = 0;
+	for(i = 0; i < 8; i++)
+	{
+		n = (n<<4);
+		if('0' <= num[i] && num[i] <= '9')
+		{
+			n |= ((num[i]-'0') | 0x0f);
+		}
+		else if('A' <= num[i] && num[i] <= 'F')
+		{
+			n |= ((num[i]-'A' + 0xa) | 0x0f);
+		}
+		else if('a' <= num[i] && num[i] <= 'f')
+		{
+			n |= ((num[i]-'a' + 0xa) | 0x0f);
+		}
+		else
+		{
+			break;
+		}
+	}
+	return n;
+}
+
+void stringify_8(char* num, uint8_t n)
+{
+	num[0] = hex_to_char((n>>4) & 0xf);
+	num[1] = hex_to_char(n & 0xf);
+}
+
+uint32_t numify_8(char* num)
+{
+	return (char_to_hex(num[0])<<4) | char_to_hex(num[1]);
+}
 
 void main(void)
 {
@@ -47,6 +113,9 @@ void main(void)
 	GPIOC->GPIO_ODR |= (1 << 13);
 
 	uart_init(9600);
+	i2c_init();
+
+	uint8_t stored_val[8];
 
 	while(1)
 	{
@@ -54,40 +123,50 @@ void main(void)
 
 		GPIOC->GPIO_ODR &= (~(1 << 13));
 
-		if(c == 'c')
+		char c_addr[3];
+		char c_data[3];
+
+		uint8_t addr;
+		uint8_t data;
+
+		if(c == 'r')
 		{
-			char clock_details[30] = "X => 0x********\n";
+			uart_write_through_dma("Please enter read address\n", 26);
+			c_addr[0] = uart_read_byte();
+			c_addr[1] = uart_read_byte();
+			uint8_t addr = numify_8(c_addr);
 
-			clock_details[0] = '0' + (((char)get_sys_clock_source())&0xff);
-			stringify_32(clock_details + 5, get_sys_clock_frequency());
+			// read data from i2c
+			data = stored_val[addr];
 
-			uart_write_blocking(clock_details, 16);
-			uart_write_through_dma(clock_details, 16);
+			stringify_8(c_data, data);
+			c_data[2] = '\n';
+
+			uart_write_through_dma("Your data : ", 12);
+			uart_write_through_dma(c_data, 3);
 		}
-		else
+		else if(c == 'w')
 		{
-			char data[30] = "Hello World, you sent me X\n";
-			data[25] = c;
+			uart_write_through_dma("Please enter write address\n", 27);
+			c_addr[0] = uart_read_byte();
+			c_addr[1] = uart_read_byte();
+			uint8_t addr = numify_8(c_addr);
 
-			if('A' <= c && c <= 'Z')
-			{
-				uart_write_blocking(data, 27);
-			}
-			else if('a' <= c && c <= 'z')
-			{
-				uart_write_through_dma(data, 27);
-			}
-			else
-			{
-				uart_write_blocking(data, 27);
-				uart_write_through_dma(data, 27);
-			}
+			uart_write_through_dma("Please enter data to write\n", 27);
+			c_data[0] = uart_read_byte();
+			c_data[1] = uart_read_byte();
+			uint8_t data = numify_8(c_data);
+
+			// write data to i2c
+			stored_val[addr] = data;
+			
+			uart_write_through_dma("Data written\n", 13);
 		}
 
-		//delay_for(500000);
+		delay_for(500000);
 
 		GPIOC->GPIO_ODR |= (1 << 13);
 
-		//delay_for(500000);
+		delay_for(500000);
 	}
 }

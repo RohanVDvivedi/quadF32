@@ -17,7 +17,7 @@ struct I2C_t
 	uint32_t I2C_TRISE;
 };
 
-#define I2C1 (*((volatile I2C_t*)(0x40005400)))
-#define I2C2 (*((volatile I2C_t*)(0x40005800)))
+#define I2C1 ((volatile I2C_t*)(0x40005400))
+#define I2C2 ((volatile I2C_t*)(0x40005800))
 
 #endif

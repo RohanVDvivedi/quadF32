@@ -115,7 +115,7 @@ void main(void)
 	uart_init(9600);
 	i2c_init();
 
-	uint8_t stored_val[8];
+	uint8_t device_address = 0x68;
 
 	while(1)
 	{
@@ -137,7 +137,7 @@ void main(void)
 			uint8_t addr = numify_8(c_addr);
 
 			// read data from i2c
-			data = stored_val[addr];
+			i2c_read(device_address, addr, &data, 1);
 
 			stringify_8(c_data, data);
 			c_data[2] = '\n';
@@ -158,7 +158,7 @@ void main(void)
 			uint8_t data = numify_8(c_data);
 
 			// write data to i2c
-			stored_val[addr] = data;
+			i2c_write(device_address, addr, &data, 1);
 			
 			uart_write_through_dma("Data written\n", 13);
 		}

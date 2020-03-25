@@ -14,7 +14,7 @@ int i2c_init()
 static void send_start_bit()
 {
 	I2C1->I2C_CR1 |= (1<<8);
-	while(I2C1->I2C_CR1 & (1<<8));
+	while(!(I2C1->I2C_CR1 & (1<<0)));
 }
 
 static void i2c_send_address(uint8_t slave_address)
@@ -35,10 +35,15 @@ static void i2c_byte_write_on_bus(char c)
 	I2C1->I2C_DR = c;
 }
 
+static void wait_for_byte_to_be_sent()
+{
+	while(!(I2C1->I2C_SR1 & (1<<2))){}
+}
+
 static void send_stop_bit()
 {
 	I2C1->I2C_CR1 |= (1<<9);
-	while(I2C1->I2C_CR1 & (1<<9));
+	while(!(I2C1->I2C_SR1 & (1<<4)));
 }
 
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)
@@ -75,6 +80,8 @@ void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsign
 	{
 		i2c_byte_write_on_bus(((char*)(buffer))[i]);
 	}
+
+	wait_for_byte_to_be_sent();
 
 	send_stop_bit();
 }

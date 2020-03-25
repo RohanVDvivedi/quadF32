@@ -1,5 +1,7 @@
 #include<i2c/i2c.h>
 
+#include<uart/uart.h>
+
 int i2c_init()
 {
 	RCC->RCC_APB1ENR |= (1<<21);
@@ -48,22 +50,25 @@ static void send_stop_bit()
 
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)
 {
-	send_start_bit();
+	send_start_bit();uart_write_through_dma("LOL\n", 4);
 
 	i2c_send_address(device_address << 1);
 
-	i2c_byte_write_on_bus(reg_address);
-
-	wait_for_byte_to_be_sent();
-
-	send_start_bit();
-
-	i2c_send_address((device_address << 1) | 1);
-
-	int i = 0;
-	for(i = 0; i < bytes_to_read; i++)
+	if(bytes_to_read > 0)
 	{
-		((char*)(buffer))[i] = i2c_byte_read_from_bus();
+		i2c_byte_write_on_bus(reg_address);
+
+		wait_for_byte_to_be_sent();
+
+		send_start_bit();
+
+		i2c_send_address((device_address << 1) | 1);
+
+		int i = 0;
+		for(i = 0; i < bytes_to_read; i++)
+		{
+			((char*)(buffer))[i] = i2c_byte_read_from_bus();
+		}
 	}
 
 	send_stop_bit();
@@ -75,15 +80,18 @@ void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsign
 
 	i2c_send_address(device_address << 1);
 
-	i2c_byte_write_on_bus(reg_address);
-
-	int i = 0;
-	for(i = 0; i < bytes_to_write; i++)
+	if(bytes_to_write > 0)
 	{
-		i2c_byte_write_on_bus(((char*)(buffer))[i]);
-	}
+		i2c_byte_write_on_bus(reg_address);
 
-	wait_for_byte_to_be_sent();
+		int i = 0;
+		for(i = 0; i < bytes_to_write; i++)
+		{
+			i2c_byte_write_on_bus(((char*)(buffer))[i]);
+		}
+
+		wait_for_byte_to_be_sent();
+	}
 
 	send_stop_bit();
 }

@@ -1,52 +1,6 @@
 #include<i2c/i2c.h>
 
 #include<uart/uart.h>
-/*
-static uint32_t temp[16];
-static char num[11];
-static void stringify_32(char* num, uint32_t n)
-{
-	int j = 0; int i = 0;
-	num[j++] = '0';
-	num[j++] = 'x';
-	for(i = 1; i <= 8; i++, j++)
-	{
-		num[j] = (char)((n>>((8-i)*4))&0x0f);
-		if(num[j] <= 0x09)
-		{
-			num[j] += '0';
-		}
-		else if(num[j] <= 0x0f)
-		{
-			num[j] -= 0x0a;
-			num[j] += 'A';
-		}
-	}
-	num[j++] = '\n';
-}
-
-static void init_temps()
-{
-	uint32_t i = 0;
-	for(i = 0; i < 16; i++)
-	{
-		temp[i] = 0xf1f2f3f4;
-	}
-}
-
-static void print_temps()
-{
-	uint32_t i = 0;
-	for(i = 0; i < 16; i++)
-	{
-		uart_write_through_dma("addr -> ", 8);
-		stringify_32(num, i);num[10] = '=';uart_write_through_dma(num, 11);
-		uart_write_through_dma(" ", 1);
-		stringify_32(num, temp[i]);uart_write_through_dma(num, 11);
-	}
-	uart_write_through_dma("\n", 1);
-}
-*/
 
 int i2c_init()
 {

@@ -133,12 +133,12 @@ void main(void)
 
 		if(c == 'r')
 		{
-			uart_write_through_dma("Please enter read address\n", 26);
+			uart_write_blocking("Please enter read address\n", 26);
 			c_addr[0] = uart_read_byte();
 			c_addr[1] = uart_read_byte();
 			addr = numify_8(c_addr);
 
-			uart_write_through_dma("Please enter number of bytes to read\n", 37);
+			uart_write_blocking("Please enter number of bytes to read\n", 37);
 			c_data_count[0] = '0';
 			c_data_count[1] = uart_read_byte();
 			data_count = numify_8(c_data_count);
@@ -158,12 +158,12 @@ void main(void)
 		}
 		else if(c == 'w')
 		{
-			uart_write_through_dma("Please enter write address\n", 27);
+			uart_write_blocking("Please enter write address\n", 27);
 			c_addr[0] = uart_read_byte();
 			c_addr[1] = uart_read_byte();
 			addr = numify_8(c_addr);
 
-			uart_write_through_dma("Please enter number of bytes to write\n", 38);
+			uart_write_blocking("Please enter number of bytes to write\n", 38);
 			c_data_count[0] = '0';
 			c_data_count[1] = uart_read_byte();
 			data_count = numify_8(c_data_count);
@@ -171,7 +171,7 @@ void main(void)
 			uint8_t i = 0;
 			for(; i < data_count; i++)
 			{
-				uart_write_through_dma("Please enter data to write\n", 27);
+				uart_write_blocking("Please enter data to write\n", 27);
 				c_data[0] = uart_read_byte();
 				c_data[1] = uart_read_byte();
 				data[i] = numify_8(c_data);
@@ -180,7 +180,26 @@ void main(void)
 			// write data to i2c
 			i2c_write(device_address, addr, &data, data_count);
 			
-			uart_write_through_dma("Data written\n", 13);
+			uart_write_blocking("Data written\n", 13);
+		}
+		else if(c == 'd')
+		{
+			uint8_t device_detection_address = 0;
+			char c_dev[3];
+			for(device_detection_address = 0; device_detection_address <= 0x7f; device_detection_address++)
+			{
+				if(i2c_detect(device_detection_address))
+				{
+					c_dev[2] = '\n';
+					stringify_8(c_dev, device_detection_address);
+					uart_write_blocking(c_dev, 3);
+				}
+			}
+
+			uart_write_blocking("Please enter new address\n", 25);
+			c_dev[0] = uart_read_byte();
+			c_dev[1] = uart_read_byte();
+			device_address = numify_8(c_dev);
 		}
 
 		delay_for(500000);

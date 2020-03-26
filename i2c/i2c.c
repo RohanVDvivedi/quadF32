@@ -72,20 +72,23 @@ static void send_start_bit()
 	while(!(I2C1->I2C_SR1 & (1<<0)));
 }
 
-// returns 0 if device found
+// returns 1 if device found
 static int i2c_send_address(uint8_t slave_address)
 {
 	I2C1->I2C_DR = slave_address;
-	uint32_t L = 0;
-	while(!(I2C1->I2C_SR1 & (1<<1)))
+	while(!(I2C1->I2C_SR1 & (1<<1)) && !(I2C1->I2C_SR1 & (1<<10)));
+	int success = 0;
+	if(I2C1->I2C_SR1 & (1<<1))
 	{
-		if(L >= 5000000)
-		{
-			return I2C1->I2C_SR1;
-		}
-		L++;
+		volatile uint32_t dummy_read = I2C1->I2C_SR2;
+		success = 1;
 	}
-	return 0;
+	if(I2C1->I2C_SR1 & (1<<10))
+	{
+		I2C1->I2C_SR1 &= ~(1<<10);
+		success = 0;
+	}
+	return success;
 }
 
 static int i2c_byte_read_from_bus(char* r)
@@ -118,14 +121,14 @@ static void wait_for_byte_to_be_sent()
 static void send_stop_bit()
 {
 	I2C1->I2C_CR1 |= (1<<9);
-	while(!(I2C1->I2C_SR1 & (1<<4)));
+	while(I2C1->I2C_SR2 & (1<<0));
 }
 
-uint32_t i2c_detect(uint8_t device_address)
+int i2c_detect(uint8_t device_address)
 {
 	send_start_bit();
-	uint32_t addr_acked = i2c_send_address(device_address << 1);
-	if(!addr_acked)
+	int addr_acked = i2c_send_address(device_address << 1);
+	if(addr_acked)
 	{
 		send_stop_bit();
 	}
@@ -134,32 +137,31 @@ uint32_t i2c_detect(uint8_t device_address)
 
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)
 {
-	init_temps();print_temps();
-
 	send_start_bit();
 
 	int addr_acked = i2c_send_address(device_address << 1);
 
-	temp[15] = 0xFEEDBEAD;
-
-	if(bytes_to_read > 0 && addr_acked && 0)
+	if(addr_acked)
 	{
-		i2c_byte_write_on_bus(reg_address);
-
-		wait_for_byte_to_be_sent();
-
-		send_start_bit();
-
-		i2c_send_address((device_address << 1) | 1);
-
-		int i = 0;
-		for(i = 0; i < bytes_to_read; i++)
+		if(bytes_to_read > 0 && addr_acked && 0)
 		{
-			i2c_byte_read_from_bus(((char*)(buffer)) + i);
-		}
-	}
+			i2c_byte_write_on_bus(reg_address);
 
-	send_stop_bit();
+			wait_for_byte_to_be_sent();
+
+			send_start_bit();
+
+			i2c_send_address((device_address << 1) | 1);
+
+			int i = 0;
+			for(i = 0; i < bytes_to_read; i++)
+			{
+				i2c_byte_read_from_bus(((char*)(buffer)) + i);
+			}
+		}
+
+		send_stop_bit();
+	}
 	print_temps();
 }
 

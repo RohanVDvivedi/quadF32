@@ -137,6 +137,7 @@ void main(void)
 			uint8_t addr = numify_8(c_addr);
 
 			// read data from i2c
+			data = 0xff;
 			i2c_read(device_address, addr, &data, 1);
 
 			stringify_8(c_data, data);

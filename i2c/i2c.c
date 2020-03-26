@@ -136,13 +136,8 @@ int i2c_detect(uint8_t device_address)
 
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)
 {
-	init_temps();static int first = 0;
-	if(first == 1)
-	{
-		temp[0] = I2C1->I2C_SR1;
-		goto PRINT;
-	}
-	send_start_bit();GPIOC->GPIO_ODR |= (1 << 13);
+	//init_temps();
+	send_start_bit();
 
 	int addr_acked = i2c_send_address(device_address << 1);
 
@@ -163,6 +158,10 @@ void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigne
 			{
 				I2C1->I2C_CR1 |= (1<<10);
 			}
+			else
+			{
+				I2C1->I2C_CR1 |= (1<<9);
+			}
 
 			unsigned int i = 0;
 			for(i = 0; i < bytes_to_read; i++)
@@ -171,37 +170,43 @@ void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigne
 				if((i + 1) == (bytes_to_read - 1))
 				{
 					I2C1->I2C_CR1 &= ~(1<<10);
+					I2C1->I2C_CR1 |= (1<<9);
 				}
 			}
 		}
 
-		send_stop_bit();
+		
+		while(I2C1->I2C_SR2 & (1<<0));
+
+		//send_stop_bit();
 	}
-	PRINT:;
-	first++;
-	print_temps();
+	
+	//print_temps();
 }
 
 void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_write)
 {
 	send_start_bit();
 
-	i2c_send_address(device_address << 1);
+	int addr_acked = i2c_send_address(device_address << 1);
 
-	if(bytes_to_write > 0)
+	if(addr_acked)
 	{
-		i2c_byte_write_on_bus(reg_address);
-
-		int i = 0;
-		for(i = 0; i < bytes_to_write; i++)
+		if(bytes_to_write > 0)
 		{
-			i2c_byte_write_on_bus(((char*)(buffer))[i]);
+			i2c_byte_write_on_bus(reg_address);
+
+			unsigned int i = 0;
+			for(i = 0; i < bytes_to_write; i++)
+			{
+				i2c_byte_write_on_bus(((char*)(buffer))[i]);
+			}
+
+			wait_for_byte_to_be_sent();
 		}
 
-		wait_for_byte_to_be_sent();
+		send_stop_bit();
 	}
-
-	send_stop_bit();
 }
 
 void i2c_read_using_dma(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)

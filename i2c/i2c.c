@@ -68,7 +68,7 @@ int i2c_init()
 static void send_start_bit()
 {
 	I2C1->I2C_CR1 |= (1<<8);
-	while(!(I2C1->I2C_SR2 & (1<<0)));
+	//while(!(I2C1->I2C_SR2 & (1<<0)));
 	while(!(I2C1->I2C_SR1 & (1<<0)));
 }
 
@@ -137,13 +137,19 @@ int i2c_detect(uint8_t device_address)
 
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)
 {
-	send_start_bit();
+	init_temps();static int first = 0;
+	if(first == 1)
+	{
+		temp[0] = I2C1->I2C_SR1;
+		goto PRINT;
+	}
+	send_start_bit();GPIOC->GPIO_ODR |= (1 << 13);
 
 	int addr_acked = i2c_send_address(device_address << 1);
 
 	if(addr_acked)
 	{
-		if(bytes_to_read > 0 && addr_acked && 0)
+		if(bytes_to_read > 0)
 		{
 			i2c_byte_write_on_bus(reg_address);
 
@@ -153,15 +159,27 @@ void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigne
 
 			i2c_send_address((device_address << 1) | 1);
 
-			int i = 0;
+			// turn on ack, for slave
+			if(bytes_to_read > 1)
+			{
+				I2C1->I2C_CR1 |= (1<<10);
+			}
+
+			unsigned int i = 0;
 			for(i = 0; i < bytes_to_read; i++)
 			{
 				i2c_byte_read_from_bus(((char*)(buffer)) + i);
+				if(i == (bytes_to_read - 1))
+				{
+					I2C1->I2C_CR1 &= ~(1<<10);
+				}
 			}
 		}
 
 		send_stop_bit();
 	}
+	PRINT:;
+	first++;
 	print_temps();
 }
 

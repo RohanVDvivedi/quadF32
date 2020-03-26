@@ -115,6 +115,33 @@ void main(void)
 	uart_init(9600);
 	i2c_init();
 
+	while(1){}
+
+	uint8_t A = 0;
+	char c_A[3];
+	for(A = 0; A < 256; A++)
+	{
+		GPIOC->GPIO_ODR &= (~(1 << 13));
+			uart_write_through_dma("Detecting for device address ", 29);
+			stringify_8(c_A, A);
+			c_A[2] = '\n';
+			uart_write_through_dma(c_A, 3);
+		uint32_t sr = i2c_detect(A);
+		if(!sr)
+		{
+			uart_write_through_dma(c_A, 3);
+		}
+		else
+		{
+			char c_sr[11];
+			stringify_32(c_sr, sr);
+			c_sr[10] = '\n';
+			uart_write_through_dma(c_sr, 11);
+		}
+		GPIOC->GPIO_ODR |= (1 << 13);
+		delay_for(500000);
+	}
+
 	uint8_t device_address = 0x68;
 
 	while(1)

@@ -8,6 +8,8 @@
 
 int i2c_init();
 
+uint32_t i2c_detect(uint8_t device_address);
+
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read);
 
 void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_write);

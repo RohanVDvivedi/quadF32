@@ -68,7 +68,6 @@ int i2c_init()
 static void send_start_bit()
 {
 	I2C1->I2C_CR1 |= (1<<8);
-	//while(!(I2C1->I2C_SR2 & (1<<0)));
 	while(!(I2C1->I2C_SR1 & (1<<0)));
 }
 
@@ -169,7 +168,7 @@ void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigne
 			for(i = 0; i < bytes_to_read; i++)
 			{
 				i2c_byte_read_from_bus(((char*)(buffer)) + i);
-				if(i == (bytes_to_read - 1))
+				if((i + 1) == (bytes_to_read - 1))
 				{
 					I2C1->I2C_CR1 &= ~(1<<10);
 				}

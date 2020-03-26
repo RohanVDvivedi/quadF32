@@ -1,7 +1,7 @@
 #include<i2c/i2c.h>
 
 #include<uart/uart.h>
-
+/*
 static uint32_t temp[16];
 static char num[11];
 static void stringify_32(char* num, uint32_t n)
@@ -46,6 +46,7 @@ static void print_temps()
 	}
 	uart_write_through_dma("\n", 1);
 }
+*/
 
 int i2c_init()
 {
@@ -136,7 +137,6 @@ int i2c_detect(uint8_t device_address)
 
 void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)
 {
-	//init_temps();
 	send_start_bit();
 
 	int addr_acked = i2c_send_address(device_address << 1);
@@ -175,13 +175,9 @@ void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigne
 			}
 		}
 
-		
 		while(I2C1->I2C_SR2 & (1<<0));
 
-		//send_stop_bit();
 	}
-	
-	//print_temps();
 }
 
 void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_write)

@@ -51,12 +51,18 @@ int i2c_init()
 {
 	RCC->RCC_APB1ENR |= (1<<21);
 	RCC->RCC_APB2ENR |= (1<<3);
+
 	GPIOB->GPIO_CRL |= (0xff<<24);
 
-	I2C1->I2C_CR2 = (I2C1->I2C_CR1 & ~(0x3f)) | 36;
+	/*I2C1->I2C_CR2 = (I2C1->I2C_CR2 & ~(0x3f)) | 36;
 	I2C1->I2C_CCR = 0b100000000011110;
-	I2C1->I2C_CR1 |= ((1<<8) | (1<<0));
+	I2C1->I2C_CR1 |= ((1<<8) | (1<<0));*/
 
+	I2C1->I2C_CR2 = (I2C1->I2C_CR2 & ~(0x3f)) | 8;
+	I2C1->I2C_CCR = 0x28;
+	I2C1->I2C_TRISE = 0x09;
+	I2C1->I2C_CR1 |= (1<<8);
+	I2C1->I2C_CR1 |= (1<<0);
 }
 
 static void send_start_bit()

@@ -102,9 +102,9 @@ uint32_t numify_8(char* num)
 
 void main(void)
 {
-	change_sys_clock_source(HSE, 8000000);
+	/*change_sys_clock_source(HSE, 8000000);
 	setup_pll_module(HSE, 72000000);
-	change_sys_clock_source(PLL, 72000000);
+	change_sys_clock_source(PLL, 72000000);*/
 
 	RCC->RCC_APB2ENR |= (1<<4);
 

@@ -82,10 +82,7 @@ int i2c_detect(uint8_t device_address)
 {
 	send_start_bit();
 	int addr_acked = i2c_send_address(device_address << 1);
-	if(addr_acked)
-	{
-		send_stop_bit();
-	}
+	send_stop_bit();
 	return addr_acked;
 }
 
@@ -95,43 +92,43 @@ void i2c_read(uint8_t device_address, uint8_t reg_address, void* buffer, unsigne
 
 	int addr_acked = i2c_send_address(device_address << 1);
 
-	if(addr_acked)
+	if(bytes_to_read > 0 && addr_acked)
 	{
-		if(bytes_to_read > 0)
+		i2c_byte_write_on_bus(reg_address);
+
+		wait_for_byte_to_be_sent();
+
+		send_start_bit();
+
+		i2c_send_address((device_address << 1) | 1);
+
+		// turn on ack, for slave
+		if(bytes_to_read > 1)
 		{
-			i2c_byte_write_on_bus(reg_address);
-
-			wait_for_byte_to_be_sent();
-
-			send_start_bit();
-
-			i2c_send_address((device_address << 1) | 1);
-
-			// turn on ack, for slave
-			if(bytes_to_read > 1)
-			{
-				I2C1->I2C_CR1 |= (1<<10);
-			}
-			else
-			{
-				I2C1->I2C_CR1 |= (1<<9);
-			}
-
-			unsigned int i = 0;
-			for(i = 0; i < bytes_to_read; i++)
-			{
-				i2c_byte_read_from_bus(((char*)(buffer)) + i);
-				if((i + 1) == (bytes_to_read - 1))
-				{
-					I2C1->I2C_CR1 &= ~(1<<10);
-					I2C1->I2C_CR1 |= (1<<9);
-				}
-			}
+			I2C1->I2C_CR1 |= (1<<10);
+		}
+		else
+		{
+			I2C1->I2C_CR1 |= (1<<9);
 		}
 
-		while(I2C1->I2C_SR2 & (1<<0));
-
+		unsigned int i = 0;
+		for(i = 0; i < bytes_to_read; i++)
+		{
+			i2c_byte_read_from_bus(((char*)(buffer)) + i);
+			if((i + 1) == (bytes_to_read - 1))
+			{
+				I2C1->I2C_CR1 &= ~(1<<10);
+				I2C1->I2C_CR1 |= (1<<9);
+			}
+		}
 	}
+	else
+	{
+		I2C1->I2C_CR1 |= (1<<9);
+	}
+
+	while(I2C1->I2C_SR2 & (1<<0));
 }
 
 void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_write)
@@ -140,23 +137,20 @@ void i2c_write(uint8_t device_address, uint8_t reg_address, void* buffer, unsign
 
 	int addr_acked = i2c_send_address(device_address << 1);
 
-	if(addr_acked)
+	if(bytes_to_write > 0 && addr_acked)
 	{
-		if(bytes_to_write > 0)
+		i2c_byte_write_on_bus(reg_address);
+
+		unsigned int i = 0;
+		for(i = 0; i < bytes_to_write; i++)
 		{
-			i2c_byte_write_on_bus(reg_address);
-
-			unsigned int i = 0;
-			for(i = 0; i < bytes_to_write; i++)
-			{
-				i2c_byte_write_on_bus(((char*)(buffer))[i]);
-			}
-
-			wait_for_byte_to_be_sent();
+			i2c_byte_write_on_bus(((char*)(buffer))[i]);
 		}
 
-		send_stop_bit();
+		wait_for_byte_to_be_sent();
 	}
+
+	send_stop_bit();
 }
 
 void i2c_read_using_dma(uint8_t device_address, uint8_t reg_address, void* buffer, unsigned int bytes_to_read)

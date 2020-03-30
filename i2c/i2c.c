@@ -9,13 +9,16 @@ int i2c_init()
 
 	GPIOB->GPIO_CRL |= (0xff<<24);
 
-	/*I2C1->I2C_CR2 = (I2C1->I2C_CR2 & ~(0x3f)) | 36;
-	I2C1->I2C_CCR = 0b100000000011110;
-	I2C1->I2C_CR1 |= ((1<<8) | (1<<0));*/
+	// for 36MHz APB1 clock, i2c at 400KHz
+	I2C1->I2C_CR2 = (I2C1->I2C_CR2 & ~(0x3f)) | 36;
+	I2C1->I2C_CCR = 0x801E;
+	I2C1->I2C_TRISE = 0x0b;
 
-	I2C1->I2C_CR2 = (I2C1->I2C_CR2 & ~(0x3f)) | 8;
+	// for 8MHz APB1 clock, i2c at 100KHz
+	/*I2C1->I2C_CR2 = (I2C1->I2C_CR2 & ~(0x3f)) | 8;
 	I2C1->I2C_CCR = 0x28;
-	I2C1->I2C_TRISE = 0x09;
+	I2C1->I2C_TRISE = 0x09;*/
+
 	I2C1->I2C_CR1 |= (1<<8);
 	I2C1->I2C_CR1 |= (1<<0);
 }

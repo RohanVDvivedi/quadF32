@@ -2,6 +2,7 @@
 #define QUAD_BLDC_H
 
 #include<regs/rcc.h>
+#include<regs/gpio.h>
 #include<regs/adv_tim.h>
 
 void init_bldc();

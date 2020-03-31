@@ -28,7 +28,7 @@ struct ADV_TIM_t
 	uint32_t TIM_DMAR;
 };
 
-#define TIM1 ((volatile ADV_TIM_t*)(0x40012C00));
-#define TIM8 ((volatile ADV_TIM_t*)(0x40013400));
+#define TIM1 ((volatile ADV_TIM_t*)(0x40012C00))
+#define TIM8 ((volatile ADV_TIM_t*)(0x40013400))
 
 #endif

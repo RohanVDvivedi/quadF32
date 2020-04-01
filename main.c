@@ -218,7 +218,7 @@ void main(void)
 		}
 		else if(c == 'M')
 		{
-			uart_write_blocking("Please enter value to write to motors ", 38);
+			uart_write_blocking("Please enter value to write to motors\n", 38);
 
 			char c_m_val[2];
 			c_m_val[0] = uart_read_byte();

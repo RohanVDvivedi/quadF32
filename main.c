@@ -203,6 +203,19 @@ void main(void)
 			c_dev[1] = uart_read_byte();
 			device_address = numify_8(c_dev);
 		}
+		else if(c == 'T')
+		{
+			uart_write_blocking("Counter value : ", 16);
+			char c_counter[11];
+
+			c_counter[10] = ' ';
+			stringify_32(c_counter, TIM2->TIM_CNT);
+			uart_write_blocking(c_counter, 11);
+
+			c_counter[10] = '\n';
+			stringify_32(c_counter, TIM2->TIM_SR);
+			uart_write_blocking(c_counter, 11);
+		}
 
 		delay_for(500000);
 

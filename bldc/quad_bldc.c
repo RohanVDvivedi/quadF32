@@ -11,6 +11,8 @@ void init_bldc()
 	TIM2->TIM_CR1 = 0;
 	TIM2->TIM_CR1 |= (1<<7);
 
+	TIM2->TIM_EGR = 0x1f;
+
 	// initialize counter value to 0
 	TIM2->TIM_CNT = 0;
 	// the APB2 clock is 72 MHz, we want to create 1 microsecond per timer tick

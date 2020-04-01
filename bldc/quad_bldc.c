@@ -8,27 +8,27 @@ void init_bldc()
 
 	GPIOA->GPIO_CRL = (GPIOA->GPIO_CRL & ~(0xffff)) | 0xdddd;
 
-	TIM1->TIM_CR1 = 0;
+	TIM2->TIM_CR1 = 0;
 
 	// initialize counter value to 0
-	TIM1->TIM_CNT = 0;
+	TIM2->TIM_CNT = 0;
 	// the APB2 clock is 72 MHz, we want to create 1 microsecond per timer tick
-	TIM1->TIM_PSC = 72;
+	TIM2->TIM_PSC = 72;
 	// we want the signal frequency of output compare equal to 2500 microsecond only (400Hz bldc motor update) 
-	TIM1->TIM_ARR = 2500;
-	TIM1->TIM_RCR = 0;
+	TIM2->TIM_ARR = 2500;
+	TIM2->TIM_RCR = 0;
 	// initial values for the ocr registers, for all four motors
-	TIM1->TIM_CCR1 = 1000;
-	TIM1->TIM_CCR2 = 1000;
-	TIM1->TIM_CCR3 = 1000;
-	TIM1->TIM_CCR4 = 1000;
+	TIM2->TIM_CCR1 = 1000;
+	TIM2->TIM_CCR2 = 1000;
+	TIM2->TIM_CCR3 = 1000;
+	TIM2->TIM_CCR4 = 1000;
 
-	TIM1->TIM_CCMR1 = 0x6868;
-	TIM1->TIM_CCMR2 = 0x6868;
+	TIM2->TIM_CCMR1 = 0x6868;
+	TIM2->TIM_CCMR2 = 0x6868;
 
-	TIM1->TIM_CCER |= ((1<<12) | (1<<8) | (1<<4) | (1<<0));
+	TIM2->TIM_CCER |= ((1<<12) | (1<<8) | (1<<4) | (1<<0));
 
-	TIM1->TIM_CR2 |= (1<<0);
+	TIM2->TIM_CR2 |= (1<<0);
 }
 
 static uint32_t compare_and_map_and_range(uint32_t value)
@@ -47,8 +47,8 @@ static uint32_t compare_and_map_and_range(uint32_t value)
 
 void set_motors(uint32_t m1, uint32_t m2, uint32_t m3, uint32_t m4)
 {
-	TIM1->TIM_CCR1 = compare_and_map_and_range(m1);
-	TIM1->TIM_CCR2 = compare_and_map_and_range(m2);
-	TIM1->TIM_CCR3 = compare_and_map_and_range(m3);
-	TIM1->TIM_CCR4 = compare_and_map_and_range(m4);
+	TIM2->TIM_CCR1 = compare_and_map_and_range(m1);
+	TIM2->TIM_CCR2 = compare_and_map_and_range(m2);
+	TIM2->TIM_CCR3 = compare_and_map_and_range(m3);
+	TIM2->TIM_CCR4 = compare_and_map_and_range(m4);
 }

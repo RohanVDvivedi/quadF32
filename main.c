@@ -216,6 +216,18 @@ void main(void)
 			stringify_32(c_counter, TIM2->TIM_SR);
 			uart_write_blocking(c_counter, 11);
 		}
+		else if(c == 'M')
+		{
+			uart_write_blocking("Please enter value to write to motors ", 38);
+
+			char c_m_val[2];
+			c_m_val[0] = uart_read_byte();
+			c_m_val[1] = uart_read_byte();
+			uint8_t m_val = numify_8(c_m_val);
+
+			uint32_t m = m_val * 4;
+			set_motors(m, m, m, m);
+		}
 
 		delay_for(500000);
 

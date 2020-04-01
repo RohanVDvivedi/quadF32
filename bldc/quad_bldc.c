@@ -9,6 +9,7 @@ void init_bldc()
 	GPIOA->GPIO_CRL = (GPIOA->GPIO_CRL & ~(0xffff)) | 0xdddd;
 
 	TIM2->TIM_CR1 = 0;
+	TIM2->TIM_CR1 |= (1<<7);
 
 	// initialize counter value to 0
 	TIM2->TIM_CNT = 0;
@@ -23,12 +24,15 @@ void init_bldc()
 	TIM2->TIM_CCR3 = 1000;
 	TIM2->TIM_CCR4 = 1000;
 
+	TIM2->TIM_CCMR1 &= ~(0x0303);
+	TIM2->TIM_CCMR2 &= ~(0x0303);
+
 	TIM2->TIM_CCMR1 = 0x6868;
 	TIM2->TIM_CCMR2 = 0x6868;
 
 	TIM2->TIM_CCER |= ((1<<12) | (1<<8) | (1<<4) | (1<<0));
 
-	TIM2->TIM_CR2 |= (1<<0);
+	TIM2->TIM_CR1 |= (1<<0);
 }
 
 static uint32_t compare_and_map_and_range(uint32_t value)

@@ -11,12 +11,12 @@ void init_bldc()
 	TIM2->TIM_CR1 = 0;
 	TIM2->TIM_CR1 |= (1<<7);
 
-	TIM2->TIM_EGR = 0x1f;
+	TIM2->TIM_SMCR = 0;
 
 	// initialize counter value to 0
 	TIM2->TIM_CNT = 0;
-	// the APB2 clock is 72 MHz, we want to create 1 microsecond per timer tick
-	TIM2->TIM_PSC = 72;
+	// the APB1 clock is 36 MHz, we want to create 1 microsecond per timer tick
+	TIM2->TIM_PSC = 36;
 	// we want the signal frequency of output compare equal to 2500 microsecond only (400Hz bldc motor update) 
 	TIM2->TIM_ARR = 2500;
 	TIM2->TIM_RCR = 0;
@@ -32,6 +32,7 @@ void init_bldc()
 	TIM2->TIM_CCMR1 = 0x6868;
 	TIM2->TIM_CCMR2 = 0x6868;
 
+	TIM2->TIM_CCER = 0;
 	TIM2->TIM_CCER |= ((1<<12) | (1<<8) | (1<<4) | (1<<0));
 
 	TIM2->TIM_CR1 |= (1<<0);

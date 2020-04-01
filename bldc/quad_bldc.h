@@ -3,7 +3,7 @@
 
 #include<regs/rcc.h>
 #include<regs/gpio.h>
-#include<regs/adv_tim.h>
+#include<regs/timer.h>
 
 void init_bldc();
 

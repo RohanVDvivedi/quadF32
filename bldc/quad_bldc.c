@@ -6,7 +6,7 @@ void init_bldc()
 	RCC->RCC_APB1ENR |= (1<<0);
 	RCC->RCC_APB2ENR |= (1<<2);
 
-	GPIOA->GPIO_CRL = (GPIOA->GPIO_CRL & ~(0xffff)) | 0xdddd;
+	GPIOA->GPIO_CRL = (GPIOA->GPIO_CRL & ~(0xffff)) | 0xbbbb;
 
 	TIM2->TIM_CR1 = 0;
 	TIM2->TIM_CR1 |= (1<<7);

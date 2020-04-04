@@ -8,13 +8,18 @@ static volatile uint32_t channel_value[6];
 void init_rc_receiver()
 {
 	// turn on timer 5 clock and the PB10-PB15 pins ports clocks
-	RCC_APB1ENR |= (1<<3);
-	RCC_APB2ENR |= (1<<3);
+	RCC->RCC_APB1ENR |= (1<<3);
+	RCC->RCC_APB2ENR |= (1<<3);
 
 	// setup timer 5 ticking every microsecond
-	TIM2->TIM_CNT = 0;
-
+	TIM2->TIM_CR1 = 0;
+	TIM5->TIM_CNT = 0;
+	TIM5->TIM_PSC = 71;
+	TIM2->TIM_ARR = 65535;
 	TIM5->TIM_CR1 |= (1<<0);
+
+	// setup gpio to input mode
+	GPIOB->GPIO_CRH = (GPIOB->GPIO_CRH & ~(0xffffff00)) | 0x44444400;
 
 	// setup six interrupts on the port
 }
@@ -27,21 +32,22 @@ void edge_interrupt_rc_channel(void)
 	for(channel_no = 0; channel_no <= 15; channel_no++)
 	{
 		int channel_pin = channel_no + 10;
-		// if the interrupt came from this pin
+		// if the interrupt came from this channel_pin
 		{
-			if(GPIOB->INPUT_REGISTER | (1<<channel_pin))
+			if(GPIOB->GPIO_IDR | (1<<channel_pin))
 			{
-				channel_start[channel_no] = timer_counter_value
+				channel_start[channel_no] = timer_counter_value;
 			}
 			else
 			{
-				if(timer_counter_value < channel_start)
+				if(timer_counter_value < channel_start[channel_no])
 				{
-					timer_counter_value += 65536
+					timer_counter_value += 65536;
 				}
 				channel_value[channel_no] = timer_counter_value - channel_start[channel_no];
 				channel_start[channel_no] = -1;
 			}
+			break;
 		}
 	}
 }

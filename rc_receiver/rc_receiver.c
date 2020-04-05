@@ -48,6 +48,7 @@ void init_rc_receiver()
 void edge_interrupt_rc_channel(void)
 {
 	uint32_t timer_counter_value = TIM5->TIM_CNT;
+	uart_write_blocking("int ", 4);
 
 	int channel_no;
 	for(channel_no = 0; channel_no < 6; channel_no++)
@@ -58,10 +59,12 @@ void edge_interrupt_rc_channel(void)
 			EXTI->EXTI_PR |= (1<<channel_pin);
 			if(GPIOB->GPIO_IDR | (1<<channel_pin))
 			{
+				uart_write_blocking("0->1\n", 5);
 				channel_start[channel_no] = timer_counter_value;
 			}
 			else
 			{
+				uart_write_blocking("1->0\n", 5);
 				if(timer_counter_value < channel_start[channel_no])
 				{
 					timer_counter_value += 65536;

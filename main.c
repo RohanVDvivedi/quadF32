@@ -5,6 +5,7 @@
 #include<uart/uart.h>
 #include<i2c/i2c.h>
 #include<bldc/quad_bldc.h>
+#include<rc_receiver/rc_receiver.h>
 
 void delay_for(volatile int clocks)
 {
@@ -116,6 +117,7 @@ void main(void)
 	uart_init(9600);
 	i2c_init();
 	init_bldc();
+	init_rc_receiver();
 
 	uint8_t device_address = 0x68;
 

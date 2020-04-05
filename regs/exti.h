@@ -14,6 +14,6 @@ struct EXTI_t
 	uint32_t EXTI_PR;
 };
 
-#define EXTI_t ((volatile EXTI_t*)(0x40010400));
+#define EXTI ((volatile EXTI_t*)(0x40010400))
 
 #endif

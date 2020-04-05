@@ -26,7 +26,7 @@ void init_rc_receiver()
 	TIM5->TIM_CR1 |= (1<<0);
 
 	// setup gpio to input mode
-	GPIOB->GPIO_CRH = (GPIOB->GPIO_CRH & ~(0xffffff00)) | 0x44444400;
+	GPIOB->GPIO_CRH = (GPIOB->GPIO_CRH & ~(0xffffff00)) | 0x88888800;
 
 	// setup six interrupts on the port
 	int channel_no;

@@ -29,10 +29,10 @@ void edge_interrupt_rc_channel(void)
 	uint32_t timer_counter_value = TIM5->TIM_CNT;
 
 	int channel_no;
-	for(channel_no = 0; channel_no <= 15; channel_no++)
+	for(channel_no = 0; channel_no < 6; channel_no++)
 	{
 		int channel_pin = channel_no + 10;
-		// if the interrupt came from this channel_pin
+		if(EXTI->EXTI_PR | (1<<channel_pin))
 		{
 			if(GPIOB->GPIO_IDR | (1<<channel_pin))
 			{

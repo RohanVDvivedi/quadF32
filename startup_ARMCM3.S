@@ -62,7 +62,66 @@ __isr_vector:
 	.long	SysTick_Handler       /* SysTick Handler */
 
 	/* External interrupts */
-	.long	Default_Handler
+	.long	Default_Handler		/* IRQ position 00 */
+	.long	Default_Handler		/* IRQ position 01 */
+	.long	Default_Handler		/* IRQ position 02 */
+	.long	Default_Handler		/* IRQ position 03 */
+	.long	Default_Handler		/* IRQ position 04 */
+	.long	Default_Handler		/* IRQ position 05 */
+	.long	Default_Handler		/* IRQ position 06 */
+	.long	Default_Handler		/* IRQ position 07 */
+	.long	Default_Handler		/* IRQ position 08 */
+	.long	Default_Handler		/* IRQ position 09 */
+	.long	Default_Handler		/* IRQ position 10 */
+	.long	Default_Handler		/* IRQ position 11 */
+	.long	Default_Handler		/* IRQ position 12 */
+	.long	Default_Handler		/* IRQ position 13 */
+	.long	Default_Handler		/* IRQ position 14 */
+	.long	Default_Handler		/* IRQ position 15 */
+	.long	Default_Handler		/* IRQ position 16 */
+	.long	Default_Handler		/* IRQ position 17 */
+	.long	Default_Handler		/* IRQ position 18 */
+	.long	Default_Handler		/* IRQ position 19 */
+	.long	Default_Handler		/* IRQ position 20 */
+	.long	Default_Handler		/* IRQ position 21 */
+	.long	Default_Handler		/* IRQ position 22 */
+	.long	Default_Handler		/* IRQ position 23 */
+	.long	Default_Handler		/* IRQ position 24 */
+	.long	Default_Handler		/* IRQ position 25 */
+	.long	Default_Handler		/* IRQ position 26 */
+	.long	Default_Handler		/* IRQ position 27 */
+	.long	Default_Handler		/* IRQ position 28 */
+	.long	Default_Handler		/* IRQ position 29 */
+	.long	Default_Handler		/* IRQ position 30 */
+	.long	Default_Handler		/* IRQ position 31 */
+	.long	Default_Handler		/* IRQ position 32 */
+	.long	Default_Handler		/* IRQ position 33 */
+	.long	Default_Handler		/* IRQ position 34 */
+	.long	Default_Handler		/* IRQ position 35 */
+	.long	Default_Handler		/* IRQ position 36 */
+	.long	Default_Handler		/* IRQ position 37 */
+	.long	Default_Handler		/* IRQ position 38 */
+	.long	Default_Handler		/* IRQ position 39 */
+	.long	Default_Handler		/* IRQ position 40 */
+	.long	Default_Handler		/* IRQ position 41 */
+	.long	Default_Handler		/* IRQ position 42 */
+	.long	Default_Handler		/* IRQ position 43 */
+	.long	Default_Handler		/* IRQ position 44 */
+	.long	Default_Handler		/* IRQ position 45 */
+	.long	Default_Handler		/* IRQ position 46 */
+	.long	Default_Handler		/* IRQ position 47 */
+	.long	Default_Handler		/* IRQ position 48 */
+	.long	Default_Handler		/* IRQ position 49 */
+	.long	Default_Handler		/* IRQ position 50 */
+	.long	Default_Handler		/* IRQ position 51 */
+	.long	Default_Handler		/* IRQ position 52 */
+	.long	Default_Handler		/* IRQ position 53 */
+	.long	Default_Handler		/* IRQ position 54 */
+	.long	Default_Handler		/* IRQ position 55 */
+	.long	Default_Handler		/* IRQ position 56 */
+	.long	Default_Handler		/* IRQ position 57 */
+	.long	Default_Handler		/* IRQ position 58 */
+	.long	Default_Handler		/* IRQ position 59 */
 
 	.size	__isr_vector, . - __isr_vector
 

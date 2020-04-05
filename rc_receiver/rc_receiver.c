@@ -2,7 +2,6 @@
 
 // channel_start with -1 means it is uninitialized or had an error in last read
 static volatile int32_t channel_start[6] = {-1, -1, -1, -1, -1, -1};
-
 static volatile uint32_t channel_value[6];
 
 void edge_interrupt_rc_channel(void);
@@ -94,11 +93,12 @@ static uint32_t compare_and_map_and_range(uint32_t value)
 	return value;
 }
 
-void get_rc_channels(uint32_t chan_ret[6])
+uint32_t get_rc_channels(uint32_t chan_ret[6])
 {
 	int iter_ch;
 	for(iter_ch = 0; iter_ch < 6; iter_ch++)
 	{
 		chan_ret[iter_ch] = compare_and_map_and_range(channel_value[iter_ch]);
 	}
+	return TIM5->TIM_CNT;
 }

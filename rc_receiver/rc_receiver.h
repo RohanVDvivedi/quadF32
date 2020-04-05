@@ -3,6 +3,7 @@
 
 #include<regs/rcc.h>
 #include<regs/gpio.h>
+#include<regs/exti.h>
 #include<regs/timer.h>
 
 void init_rc_receiver();

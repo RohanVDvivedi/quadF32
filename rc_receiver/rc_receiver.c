@@ -25,8 +25,10 @@ void init_rc_receiver()
 	TIM5->TIM_ARR = 65535;
 	TIM5->TIM_CR1 |= (1<<0);
 
-	// setup gpio to input mode
+	// setup gpio to input mode, and configure them to use as input to EXTI interrupt module
 	GPIOB->GPIO_CRH = (GPIOB->GPIO_CRH & ~(0xffffff00)) | 0x88888800;
+	AFIO->AFIO_EXTICR3 = 0x00001100;
+	AFIO->AFIO_EXTICR4 = 0x00001111;
 
 	// setup six interrupts on the port
 	int channel_no;
@@ -41,12 +43,10 @@ void init_rc_receiver()
 
 		GPIOB->GPIO_ODR &= ~(1<<channel_pin);
 	}
-	AFIO->AFIO_EXTICR3 = 0x00001100;
-	AFIO->AFIO_EXTICR4 = 0x00001111;
 
 	// setting up NVIC controller registers
-	(*((volatile uint32_t*)(EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE))) = ((uint32_t)(edge_interrupt_rc_channel));
-	NVIC->NVIC_ISER[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
+	//(*((volatile uint32_t*)(EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE))) = ((uint32_t)(edge_interrupt_rc_channel));
+	//NVIC->NVIC_ISER[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
 }
 
 void edge_interrupt_rc_channel(void)

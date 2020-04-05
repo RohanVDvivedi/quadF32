@@ -12,10 +12,10 @@ void init_rc_receiver()
 	RCC->RCC_APB2ENR |= (1<<3);
 
 	// setup timer 5 ticking every microsecond
-	TIM2->TIM_CR1 = 0;
+	TIM5->TIM_CR1 = 0;
 	TIM5->TIM_CNT = 0;
 	TIM5->TIM_PSC = 71;
-	TIM2->TIM_ARR = 65535;
+	TIM5->TIM_ARR = 65535;
 	TIM5->TIM_CR1 |= (1<<0);
 
 	// setup gpio to input mode

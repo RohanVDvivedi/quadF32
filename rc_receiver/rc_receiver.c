@@ -8,7 +8,8 @@ static volatile uint32_t channel_value[6];
 void edge_interrupt_rc_channel(void);
 
 #define VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15 		40
-#define EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE  	0x08000040 + VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15
+#define VECTOR_TABLE_BASE	((volatile uint32_t*)(0x08000040))
+#define EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE  	((volatile uint32_t*)(VECTOR_TABLE_BASE + VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15))
 
 void init_rc_receiver()
 {

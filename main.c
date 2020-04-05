@@ -205,19 +205,6 @@ void main(void)
 			c_dev[1] = uart_read_byte();
 			device_address = numify_8(c_dev);
 		}
-		else if(c == 'T')
-		{
-			uart_write_blocking("Counter value : ", 16);
-			char c_counter[11];
-
-			c_counter[10] = ' ';
-			stringify_32(c_counter, TIM2->TIM_CNT);
-			uart_write_blocking(c_counter, 11);
-
-			c_counter[10] = '\n';
-			stringify_32(c_counter, TIM2->TIM_SR);
-			uart_write_blocking(c_counter, 11);
-		}
 		else if(c == 'M')
 		{
 			uart_write_blocking("Please enter value to write to motors\n", 38);
@@ -229,6 +216,23 @@ void main(void)
 
 			uint32_t m = m_val * 4;
 			set_motors(m, m, m, m);
+		}
+		else if(c == 'R')
+		{
+			uint32_t chan_ret[6];
+			int it;
+			for(it = 0; it < 6; it++){chan_ret[it] == 0xffff;}
+			get_rc_channels(chan_ret);
+
+			uart_write_blocking("Printing RC channel values\n", 27);
+
+			char c_chan_val[11];
+			c_chan_val[10] = '\n';
+			for(it = 0; it < 6; it++)
+			{
+				stringify_32(c_chan_val, chan_ret[it]);
+				uart_write_blocking(c_chan_val, 11);
+			}
 		}
 
 		delay_for(500000);

@@ -14,15 +14,16 @@ void init_rc_receiver()
 {
 	// turn on timer 5 clock and the PB10-PB15 pins ports clocks
 	// since we are using alternate functions i.e. interrupts from port B, turn on afio clock
-	RCC->RCC_APB1ENR |= (1<<3);
+	RCC->RCC_APB1ENR |= (1<<2);
 	RCC->RCC_APB2ENR |= ((1<<3) | (1<<0));
 
 	// setup timer 5 ticking every microsecond
-	TIM5->TIM_CR1 = 0;
-	TIM5->TIM_CNT = 0;
-	TIM5->TIM_PSC = 71;
-	TIM5->TIM_ARR = 65535;
-	TIM5->TIM_CR1 |= (1<<0);
+	TIM4->TIM_CR1 = 0;
+	TIM4->TIM_SMCR = 0;
+	TIM4->TIM_CNT = 0;
+	TIM4->TIM_PSC = 71;
+	TIM4->TIM_ARR = 65535;
+	TIM4->TIM_CR1 |= (1<<0);
 
 	// setup gpio to input mode, and configure them to use as input to EXTI interrupt module
 	GPIOB->GPIO_CRH = (GPIOB->GPIO_CRH & ~(0xffffff00)) | 0x88888800;
@@ -50,7 +51,7 @@ void init_rc_receiver()
 
 void edge_interrupt_rc_channel(void)
 {
-	uint32_t timer_counter_value = TIM5->TIM_CNT;
+	uint32_t timer_counter_value = TIM4->TIM_CNT;
 
 	int channel_no;
 	for(channel_no = 0; channel_no < 6; channel_no++)
@@ -93,12 +94,11 @@ static uint32_t compare_and_map_and_range(uint32_t value)
 	return value;
 }
 
-uint32_t get_rc_channels(uint32_t chan_ret[6])
+void get_rc_channels(uint32_t chan_ret[6])
 {
 	int iter_ch;
 	for(iter_ch = 0; iter_ch < 6; iter_ch++)
 	{
 		chan_ret[iter_ch] = compare_and_map_and_range(channel_value[iter_ch]);
 	}
-	return TIM5->TIM_CNT;
 }

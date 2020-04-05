@@ -33,10 +33,13 @@ void init_rc_receiver()
 	for(channel_no = 0; channel_no < 6; channel_no++)
 	{
 		int channel_pin = channel_no + 10;
+
 		EXTI->EXTI_IMR  |= (1<<channel_pin);
 		EXTI->EXTI_EMR  |= (1<<channel_pin);
 		EXTI->EXTI_RTSR |= (1<<channel_pin);
 		EXTI->EXTI_FTSR |= (1<<channel_pin);
+
+		GPIOB->GPIO_ODR &= ~(1<<channel_pin);
 	}
 	AFIO->AFIO_EXTICR3 = 0x00001100;
 	AFIO->AFIO_EXTICR4 = 0x00001111;

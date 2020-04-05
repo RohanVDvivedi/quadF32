@@ -7,6 +7,9 @@ static volatile uint32_t channel_value[6];
 
 void edge_interrupt_rc_channel(void);
 
+#define VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15 		40
+#define EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE  	0x08000040 + VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15
+
 void init_rc_receiver()
 {
 	// turn on timer 5 clock and the PB10-PB15 pins ports clocks
@@ -25,10 +28,6 @@ void init_rc_receiver()
 	GPIOB->GPIO_CRH = (GPIOB->GPIO_CRH & ~(0xffffff00)) | 0x44444400;
 
 	// setup six interrupts on the port
-
-	#define EXTI_VECTOR_TABLE_ENTRY_REFERENCE 0x00
-	(*((volatile uint32_t*)(EXTI_VECTOR_TABLE_ENTRY_REFERENCE))) = ((uint32_t)(edge_interrupt_rc_channel));
-
 	int channel_no;
 	for(channel_no = 0; channel_no < 6; channel_no++)
 	{
@@ -40,6 +39,10 @@ void init_rc_receiver()
 	}
 	AFIO->AFIO_EXTICR3 = 0x00001100;
 	AFIO->AFIO_EXTICR4 = 0x00001111;
+
+	// setting up NVIC controller registers
+	(*((volatile uint32_t*)(EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE))) = ((uint32_t)(edge_interrupt_rc_channel));
+	NVIC->NVIC_ISER[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
 }
 
 void edge_interrupt_rc_channel(void)
@@ -69,6 +72,8 @@ void edge_interrupt_rc_channel(void)
 			break;
 		}
 	}
+
+	NVIC->NVIC_ICPR[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
 }
 
 static uint32_t compare_and_map_and_range(uint32_t value)

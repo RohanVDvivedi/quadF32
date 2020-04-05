@@ -3,6 +3,7 @@
 
 #include<regs/rcc.h>
 #include<regs/gpio.h>
+#include<regs/nvic.h>
 #include<regs/exti.h>
 #include<regs/afio.h>
 #include<regs/timer.h>

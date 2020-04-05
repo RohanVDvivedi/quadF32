@@ -46,7 +46,7 @@ void init_rc_receiver()
 
 	// setting up NVIC controller registers
 	//(*((volatile uint32_t*)(EXTI_10_15_VECTOR_TABLE_ENTRY_REFERENCE))) = ((uint32_t)(edge_interrupt_rc_channel));
-	//NVIC->NVIC_ISER[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
+	NVIC->NVIC_ISER[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
 }
 
 void edge_interrupt_rc_channel(void)

@@ -102,7 +102,7 @@ __isr_vector:
 	.long	Default_Handler		/* IRQ position 37 */
 	.long	Default_Handler		/* IRQ position 38 */
 	.long	Default_Handler		/* IRQ position 39 */
-	.long	Default_Handler		/* IRQ position 40 */
+	.long	edge_interrupt_rc_channel		/* IRQ position 40 */
 	.long	Default_Handler		/* IRQ position 41 */
 	.long	Default_Handler		/* IRQ position 42 */
 	.long	Default_Handler		/* IRQ position 43 */

@@ -68,13 +68,16 @@ void edge_interrupt_rc_channel(void)
 {
 	uint32_t TIMR4_value = TIM4->TIM_CNT;
 	uint32_t GPIOB_value = GPIOB->GPIO_IDR;
+	uint32_t EXTI_PR_val = EXTI->EXTI_PR;
+
+	uint32_t clear_pending = 0;
 
 	int channel_no;
 	int channel_pin;
 	for(channel_no = 0; channel_no < 6; channel_no++)
 	{
 		channel_pin = channel_no + 10;
-		if(EXTI->EXTI_PR & (1<<channel_pin))
+		if(EXTI_PR_val & (1<<channel_pin))
 		{
 			if(GPIOB_value & (1<<channel_pin))
 			{
@@ -84,11 +87,12 @@ void edge_interrupt_rc_channel(void)
 			{
 				channel_value[channel_no] = TIMR4_value - channel_start[channel_no];
 			}
-			EXTI->EXTI_PR |= (1<<channel_pin);
+			clear_pending |= (1<<channel_pin);
 			temp |= (1 << (channel_no * 4));
 		}
 	}
 
+	EXTI->EXTI_PR |= clear_pending;
 	NVIC->NVIC_ICPR[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
 }
 

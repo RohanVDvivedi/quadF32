@@ -1,8 +1,10 @@
 #include<rc_receiver/rc_receiver.h>
 
 // channel_start with -1 means it is uninitialized or had an error in last read
-static volatile int32_t channel_start[6] = {-1, -1, -1, -1, -1, -1};
+static volatile uint32_t channel_start[6];
 static volatile uint32_t channel_value[6];
+
+static volatile uint32_t temp;
 
 void edge_interrupt_rc_channel(void);
 
@@ -37,7 +39,6 @@ void init_rc_receiver()
 		int channel_pin = channel_no + 10;
 
 		EXTI->EXTI_IMR  |= (1<<channel_pin);
-		EXTI->EXTI_EMR  |= (1<<channel_pin);
 		EXTI->EXTI_RTSR |= (1<<channel_pin);
 		EXTI->EXTI_FTSR |= (1<<channel_pin);
 
@@ -57,36 +58,34 @@ void update_rc_channel(int channel_no)
 	{
 		channel_start[channel_no] = timer_counter_value;
 	}
-	else
+	else if(timer_counter_value > channel_start[channel_no])
 	{
-		if(channel_start[channel_no] != -1)
-		{
-			if(timer_counter_value < channel_start[channel_no])
-			{
-				timer_counter_value += 65536;
-			}
-			channel_value[channel_no] = timer_counter_value - channel_start[channel_no];
-		}
-		else
-		{
-			channel_value[channel_no] = 1000;
-		}
-		channel_start[channel_no] = -1;
+		channel_value[channel_no] = timer_counter_value - channel_start[channel_no];
 	}
 }
 
 void edge_interrupt_rc_channel(void)
 {
-	uint32_t timer_counter_value = TIM4->TIM_CNT;
+	uint32_t TIMR4_value = TIM4->TIM_CNT;
+	uint32_t GPIOB_value = GPIOB->GPIO_IDR;
 
 	int channel_no;
+	int channel_pin;
 	for(channel_no = 0; channel_no < 6; channel_no++)
 	{
-		int channel_pin = channel_no + 10;
+		channel_pin = channel_no + 10;
 		if(EXTI->EXTI_PR & (1<<channel_pin))
 		{
+			if(GPIOB_value & (1<<channel_pin))
+			{
+				channel_start[channel_no] = TIMR4_value;
+			}
+			else if(TIMR4_value > channel_start[channel_no])
+			{
+				channel_value[channel_no] = TIMR4_value - channel_start[channel_no];
+			}
 			EXTI->EXTI_PR |= (1<<channel_pin);
-			update_rc_channel(channel_no);
+			temp |= (1 << (channel_no * 4));
 		}
 	}
 
@@ -107,11 +106,14 @@ static uint32_t compare_and_map_and_range(uint32_t value)
 	return value;
 }
 
-void get_rc_channels(uint32_t chan_ret[6])
+uint32_t get_rc_channels(uint32_t chan_ret[6])
 {
 	int iter_ch;
 	for(iter_ch = 0; iter_ch < 6; iter_ch++)
 	{
 		chan_ret[iter_ch] = compare_and_map_and_range(channel_value[iter_ch]);
 	}
+	uint32_t ret = temp;
+	temp = 0;
+	return ret;
 }

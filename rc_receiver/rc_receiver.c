@@ -49,6 +49,32 @@ void init_rc_receiver()
 	NVIC->NVIC_ISER[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
 }
 
+void update_rc_channel(int channel_no)
+{
+	uint32_t timer_counter_value = TIM4->TIM_CNT;
+	int channel_pin = channel_no + 10;
+	if(GPIOB->GPIO_IDR & (1<<channel_pin))
+	{
+		channel_start[channel_no] = timer_counter_value;
+	}
+	else
+	{
+		if(channel_start[channel_no] != -1)
+		{
+			if(timer_counter_value < channel_start[channel_no])
+			{
+				timer_counter_value += 65536;
+			}
+			channel_value[channel_no] = timer_counter_value - channel_start[channel_no];
+		}
+		else
+		{
+			channel_value[channel_no] = 1000;
+		}
+		channel_start[channel_no] = -1;
+	}
+}
+
 void edge_interrupt_rc_channel(void)
 {
 	uint32_t timer_counter_value = TIM4->TIM_CNT;
@@ -60,20 +86,7 @@ void edge_interrupt_rc_channel(void)
 		if(EXTI->EXTI_PR & (1<<channel_pin))
 		{
 			EXTI->EXTI_PR |= (1<<channel_pin);
-			if(GPIOB->GPIO_IDR & (1<<channel_pin))
-			{
-				channel_start[channel_no] = timer_counter_value;
-			}
-			else
-			{
-				if(timer_counter_value < channel_start[channel_no])
-				{
-					timer_counter_value += 65536;
-				}
-				channel_value[channel_no] = timer_counter_value - channel_start[channel_no];
-				channel_start[channel_no] = -1;
-			}
-			break;
+			update_rc_channel(channel_no);
 		}
 	}
 

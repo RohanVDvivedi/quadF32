@@ -4,8 +4,6 @@
 static volatile uint32_t channel_start[6];
 static volatile uint32_t channel_value[6];
 
-static volatile uint32_t temp;
-
 void edge_interrupt_rc_channel(void);
 
 #define VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15 		40
@@ -92,7 +90,6 @@ void edge_interrupt_rc_channel(void)
 				channel_value[channel_no] = TIMR4_value + 65536 - channel_start[channel_no];
 			}
 			clear_pending |= (1<<channel_pin);
-			temp |= (1 << (channel_no * 4));
 		}
 	}
 
@@ -114,14 +111,11 @@ static uint32_t compare_and_map_and_range(uint32_t value)
 	return value;
 }
 
-uint32_t get_rc_channels(uint32_t chan_ret[6])
+void get_rc_channels(uint32_t chan_ret[6])
 {
 	int iter_ch;
 	for(iter_ch = 0; iter_ch < 6; iter_ch++)
 	{
 		chan_ret[iter_ch] = compare_and_map_and_range(channel_value[iter_ch]);
 	}
-	uint32_t ret = temp;
-	temp = 0;
-	return ret;
 }

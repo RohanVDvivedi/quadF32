@@ -10,6 +10,6 @@
 
 void init_rc_receiver();
 
-uint32_t get_rc_channels(uint32_t chan_ret[6]);
+void get_rc_channels(uint32_t chan_ret[6]);
 
 #endif

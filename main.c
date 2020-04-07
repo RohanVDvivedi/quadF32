@@ -222,15 +222,12 @@ void main(void)
 			uint32_t chan_ret[6];
 			int it;
 			for(it = 0; it < 6; it++){chan_ret[it] == 0xffff;}
-			uint32_t temp = get_rc_channels(chan_ret);
+			get_rc_channels(chan_ret);
 
 			uart_write_blocking("Printing RC channel values\n", 27);
 
 			char c_chan_val[11];
 			c_chan_val[10] = '\n';
-
-			stringify_32(c_chan_val, temp);
-			uart_write_blocking(c_chan_val, 11);
 
 			for(it = 0; it < 6; it++)
 			{

@@ -87,6 +87,10 @@ void edge_interrupt_rc_channel(void)
 			{
 				channel_value[channel_no] = TIMR4_value - channel_start[channel_no];
 			}
+			else
+			{
+				channel_value[channel_no] = TIMR4_value + 65536 - channel_start[channel_no];
+			}
 			clear_pending |= (1<<channel_pin);
 			temp |= (1 << (channel_no * 4));
 		}

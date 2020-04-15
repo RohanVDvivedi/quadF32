@@ -1,3 +1,5 @@
+#include<delay/delay.h>
+
 #include<regs/rcc.h>
 #include<regs/gpio.h>
 
@@ -6,14 +8,6 @@
 #include<i2c/i2c.h>
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
-
-void delay_for(volatile int clocks)
-{
-	while(clocks--)
-	{
-		asm("nop");
-	}
-}
 
 char hex_to_char(uint8_t n)
 {

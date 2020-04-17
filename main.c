@@ -22,7 +22,7 @@ void main(void)
 	GPIOC->GPIO_CRH |= 0x00200000;
 	GPIOC->GPIO_ODR |= (1 << 13);
 
-	//rtc_init();
+	rtc_init();
 
 	while(1)
 	{

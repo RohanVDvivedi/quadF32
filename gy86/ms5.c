@@ -35,7 +35,7 @@ void baro_init()
     i2c_write_raw(MS5611_ADDRESS, &command, 1);
 
     // ther is delay required after reset to read prom
-    delay_for(15);
+    delay_for_ms(15);
 
     // prom read sequence
     command = 0xa0 | (0x01 << 1);
@@ -74,7 +74,7 @@ void baro_init()
     data.C6_TEMPSENS = (data.C6_TEMPSENS << 8) | ((data.C6_TEMPSENS >> 8) & 0x00ff);
 
     // ther is delay required after reading prom
-    delay_for(15);
+    delay_for_ms(15);
 
     current_state = INIT;
 }

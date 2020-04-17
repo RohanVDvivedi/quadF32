@@ -30,7 +30,7 @@ const HMCdatascaled* hmc_init()
     // magnetometer settings done
 
     // a small delay before we start reading the sensors
-    delay_for(200);
+    delay_for_ms(200);
 
     uint16_t i;
     for(i = 0; i < 200; i++)
@@ -40,7 +40,7 @@ const HMCdatascaled* hmc_init()
         initial.magn.xi += (datasc.magn.xi/200);
         initial.magn.yj += (datasc.magn.yj/200);
         initial.magn.zk += (datasc.magn.zk/200);
-        delay_for(14);
+        delay_for_ms(14);
     }
 
     return &initial;

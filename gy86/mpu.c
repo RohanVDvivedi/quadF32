@@ -57,7 +57,7 @@ const MPUdatascaled* mpu_init()
     // mpu6050 going zoo00000mm
 
     // a small delay before we start reading the sensors
-    delay_for(200);
+    delay_for_ms(200);
 
     uint16_t i;
     for(i = 0; i < 500; i++)
@@ -70,7 +70,7 @@ const MPUdatascaled* mpu_init()
         initial.gyro.xi += (datasc.gyro.xi/500);
         initial.gyro.yj += (datasc.gyro.yj/500);
         initial.gyro.zk += (datasc.gyro.zk/500);
-        delay_for(1);
+        delay_for_ms(1);
     }
 
     return &initial;

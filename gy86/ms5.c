@@ -1,6 +1,6 @@
 #include<gy86/gy86.h>
 #include<math.h>
-/*
+
 typedef struct Barodata Barodata;
 struct Barodata
 {
@@ -16,10 +16,10 @@ struct Barodata
 };
 
 // this is where we store the configuration data of MS5611 and the digital raw values of MS5611
-static volatile Barodata data;
+static Barodata data;
 
 // the current state the sensor is in
-static volatile MS5611state current_state;
+static MS5611state current_state;
 
 MS5611state get_current_ms5611_state()
 {
@@ -35,7 +35,7 @@ void baro_init()
     i2c_write_raw(MS5611_ADDRESS, &command, 1);
 
     // ther is delay required after reset to read prom
-    vTaskDelay(15 / portTICK_PERIOD_MS);
+    delay_for(15);
 
     // prom read sequence
     command = 0xa0 | (0x01 << 1);
@@ -74,65 +74,57 @@ void baro_init()
     data.C6_TEMPSENS = (data.C6_TEMPSENS << 8) | ((data.C6_TEMPSENS >> 8) & 0x00ff);
 
     // ther is delay required after reading prom
-    vTaskDelay(15 / portTICK_PERIOD_MS);
+    delay_for(15);
 
     current_state = INIT;
 }
 
-esp_err_t request_Barodata_abspressure()
+int request_Barodata_abspressure()
 {
     // Pressure conversion start
     uint8_t command = 0x48;
-    esp_err_t err = i2c_write_raw(MS5611_ADDRESS, &(command), 1);
+    i2c_write_raw(MS5611_ADDRESS, &(command), 1);
     current_state = REQUESTED_PRESSURE;
-    return err;
+    return 1;
 }
 
-esp_err_t request_Barodata_temperature()
+int request_Barodata_temperature()
 {
     // Temperature conversion start
     uint8_t command = 0x58;
-    esp_err_t err = i2c_write_raw(MS5611_ADDRESS, &(command), 1);
+    i2c_write_raw(MS5611_ADDRESS, &(command), 1);
     current_state = REQUESTED_TEMPERATURE;
-    return err;
+    return 1;
 }
 
-esp_err_t get_raw_Barodata_abspressure()
+int get_raw_Barodata_abspressure()
 {
     // sensor data read command
     uint8_t command = 0x00;
-    esp_err_t err;
-    err = i2c_write_raw(MS5611_ADDRESS, &(command), 1);
+    i2c_write_raw(MS5611_ADDRESS, &(command), 1);
 
-    if(err == ESP_OK)
-    {
-        // read and place it in pressure D1
-        uint8_t data_read[3];
-        err = i2c_read_raw(MS5611_ADDRESS, data_read, 3);
-        data.D1 = (data_read[0] << 16) | (data_read[1] << 8) | data_read[2];
-    }
+    // read and place it in pressure D1
+    uint8_t data_read[3];
+    i2c_read_raw(MS5611_ADDRESS, data_read, 3);
+    data.D1 = (data_read[0] << 16) | (data_read[1] << 8) | data_read[2];
 
     current_state = READ_PRESSURE;
-    return err;
+    return 1;
 }
 
-esp_err_t get_raw_Barodata_temperature()
+int get_raw_Barodata_temperature()
 {
     // sensor data read command
     uint8_t command = 0x00;
-    esp_err_t err;
-    err = i2c_write_raw(MS5611_ADDRESS, &(command), 1);
+    i2c_write_raw(MS5611_ADDRESS, &(command), 1);
 
-    if(err == ESP_OK)
-    {
-        // read and place it in temperature D2
-        uint8_t data_read[3];
-        err = i2c_read_raw(MS5611_ADDRESS, data_read, 3);
-        data.D2 = (data_read[0] << 16) | (data_read[1] << 8) | data_read[2];
-    }
+    // read and place it in temperature D2
+    uint8_t data_read[3];
+    i2c_read_raw(MS5611_ADDRESS, data_read, 3);
+    data.D2 = (data_read[0] << 16) | (data_read[1] << 8) | data_read[2];
 
     current_state = READ_TEMPERATURE;
-    return err;
+    return 1;
 }
 
 void scale_and_compensate_Barodata(Barodatascaled* result)
@@ -156,4 +148,3 @@ void scale_and_compensate_Barodata(Barodatascaled* result)
     // in meters above sea level
     result->altitude = ((pow( 10.0, log10(result->abspressure / 1013.25) / 5.2558797 ) - 1) * 1000000 * 0.3048)/(-6.8755856);
 }
-*/

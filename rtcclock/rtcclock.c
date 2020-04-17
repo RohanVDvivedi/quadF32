@@ -5,7 +5,7 @@ void rtc_init()
 	
 }
 
-unsigned int get_now_micros()
+uint32_t get_now_micros()
 {
-
+	return (RTC->RTC_CNTH << 16) | RTC->RTC_CNTL;
 }

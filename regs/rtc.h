@@ -18,6 +18,6 @@ struct RTC_t
 	uint32_t RTC_ALRL;
 };
 
-#define RTC ((volatile RTC_t*)(0x40021000))
+#define RTC ((volatile RTC_t*)(0x40002800))
 
 #endif

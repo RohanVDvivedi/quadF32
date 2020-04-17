@@ -14,7 +14,7 @@ void rtc_init()
 	RCC->RCC_CSR |= (1<<0);
 	while(!(RCC->RCC_CSR & (1<<1))){}
 
-	// reset backup domain, select LSI as RTC clock and enable RTC
+	// reset backup domain, select LSI as RTC clock and enable RTC clock
 	RCC->RCC_BDCR |= (1<<16);
 	RCC->RCC_BDCR = (RCC->RCC_BDCR & ~(0x3<<8)) | (0x2<<8);
 	RCC->RCC_BDCR |= (1<<15);

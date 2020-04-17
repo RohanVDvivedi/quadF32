@@ -5,8 +5,8 @@
 
 void delay_for(volatile unsigned int clocks);
 
-void delay_for_ms(unsigned int millis);
+void delay_for_ms(uint64_t millis);
 
-void delay_for_us(unsigned int micros);
+void delay_for_us(uint64_t micros);
 
 #endif

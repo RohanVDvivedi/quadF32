@@ -8,13 +8,13 @@ void delay_for(volatile unsigned int clocks)
 	}
 }
 
-void delay_for_ms(unsigned int millis)
+void delay_for_ms(uint64_t millis)
 {
 	delay_for_us(millis * 1000);
 }
 
-void delay_for_us(unsigned int micros)
+void delay_for_us(uint64_t micros)
 {
-	unsigned int now = get_now_micros();
+	uint64_t now = get_now_micros();
 	while(get_now_micros() - now < micros);
 }

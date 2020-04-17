@@ -7,6 +7,8 @@
 
 void rtc_init();
 
+uint32_t get_now();
+
 uint64_t get_now_micros();
 
 #endif

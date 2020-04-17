@@ -23,12 +23,19 @@ void main(void)
 	GPIOC->GPIO_ODR |= (1 << 13);
 
 	rtc_init();
+	uart_init(9600);
 
 	while(1)
 	{
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
+		uint32_t rtc_count = get_now();
+		char c_rtc_count[11];
+		c_rtc_count[10] = '\n';
+		stringify_32(c_rtc_count, rtc_count);
+		uart_write_blocking(c_rtc_count, 11);
+
 		//delay_for_ms(1000);
-		delay_for(1000000);
+		delay_for(5000000);
 	}
 }

@@ -7,17 +7,19 @@ void rtc_init()
 	// turn on clock to enable writing to power registers and backup interface
 	RCC->RCC_APB1ENR |= (3<<27);
 
-	// disable backup and rtc registers write protection
-	PWR->PWR_CR |= (1<<5);
+	// disable backup and rtc registers write protection, DBP bit
+	PWR->PWR_CR |= (1<<8);
 
 	// turn on LSI clock and wait for it to get stable
 	RCC->RCC_CSR |= (1<<0);
 	while(!(RCC->RCC_CSR & (1<<1))){}
 
 	// reset backup domain, select LSI as RTC clock and enable RTC clock
-	RCC->RCC_BDCR |= (1<<16);
 	RCC->RCC_BDCR = (RCC->RCC_BDCR & ~(0x3<<8)) | (0x2<<8);
 	RCC->RCC_BDCR |= (1<<15);
+
+	// wait until registers are synchronized
+	while(!(RTC->RTC_CRL & (1<<3)));
 
 	// check if the previous RTC register writes completed
 	while(!(RTC->RTC_CRL & (1<<5)));
@@ -36,6 +38,11 @@ void rtc_init()
 	RTC->RTC_CRL &= ~(1<<4);
 	// check if the RTC register writes completed
 	while(!(RTC->RTC_CRL & (1<<5)));
+}
+
+uint32_t get_now()
+{
+	return ((RTC->RTC_CNTH << 16) | RTC->RTC_CNTL);
 }
 
 uint64_t get_now_micros()

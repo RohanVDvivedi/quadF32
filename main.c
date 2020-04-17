@@ -22,16 +22,13 @@ void main(void)
 	GPIOC->GPIO_CRH |= 0x00200000;
 	GPIOC->GPIO_ODR |= (1 << 13);
 
-	rtc_init();
+	//rtc_init();
 
 	while(1)
 	{
-		GPIOC->GPIO_ODR &= (~(1 << 13));
+		GPIOC->GPIO_ODR ^= (1 << 13);
 
-		delay_for_ms(5);
-
-		GPIOC->GPIO_ODR |= (1 << 13);
-
-		delay_for_ms(5);
+		//delay_for_ms(1000);
+		delay_for(1000000);
 	}
 }

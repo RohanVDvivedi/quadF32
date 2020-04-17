@@ -54,7 +54,7 @@ void main(void)
 		MPUdatascaled mpuData;
 		get_scaled_MPUdata(&mpuData);
 
-		uint32_t x_acc = mpuData.accl.xi;
+		uint32_t x_acc = ((uint32_t)(mpuData.accl.zk));
 		char c_x_acc[11];
 		c_x_acc[10] = '\n';
 		stringify_32(c_x_acc, x_acc);

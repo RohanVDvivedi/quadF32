@@ -54,12 +54,13 @@ void main(void)
 		MPUdatascaled mpuData;
 		get_scaled_MPUdata(&mpuData);
 
-		uint32_t x_acc = ((uint32_t)(mpuData.accl.zk));
-		char c_x_acc[11];
-		c_x_acc[10] = '\n';
-		stringify_32(c_x_acc, x_acc);
-		uart_write_blocking(c_x_acc, 11);
+		char c_sensed[128];
+		char* end = c_sensed;
+		end = stringify_double(end, mpuData.accl.xi);*end = '\t';end++;*end = '\t';end++;
+		end = stringify_double(end, mpuData.accl.yj);*end = '\t';end++;*end = '\t';end++;
+		end = stringify_double(end, mpuData.accl.zk);*end = '\n';end++;
+		uart_write_blocking(c_sensed, end - c_sensed);
 
-		delay_for_ms(1000);
+		delay_for_ms(100);
 	}
 }

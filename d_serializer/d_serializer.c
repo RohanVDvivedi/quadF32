@@ -86,3 +86,63 @@ uint32_t numify_8(char* num)
 {
 	return (char_to_hex(num[0])<<4) | char_to_hex(num[1]);
 }
+
+char* stringify_integer(char* num, int i)
+{
+	if(i == 0)
+	{
+		*num = '0';num++;
+	}
+	else
+	{
+		if(i < 0)
+		{
+			*num = '-';num++;
+			i = -i;
+		}
+
+		char* start = num;
+	    while(i > 0)
+		{
+			*num = (i % 10) + '0';
+			num++;
+			i /= 10;
+		}
+
+		char* end = num - 1;
+
+    	while(start < end)
+		{
+			char temp = *start;
+			*start = *end;
+			*end = temp;
+			start++;
+			end--;
+		}
+	}
+	return num;
+}
+
+char* stringify_double(char* num, double f)
+{
+	if(f != f)
+	{
+		*num = 'n';num++;
+		*num = 'a';num++;
+		*num = 'n';num++;
+	}
+
+	if(f < 0)
+	{
+		*num = '-';num++;
+		f = -f;
+	}
+
+	int whole = ((int)(f));
+	double fraction = f - ((double)(whole));
+	int fraction_wh = ((int)(fraction * 1000000));
+
+	num = stringify_integer(num, whole);
+	*num = '.';num++;
+	return stringify_integer(num, fraction_wh);
+}

@@ -15,4 +15,8 @@ void stringify_8(char* num, uint8_t n);
 
 uint32_t numify_8(char* num);
 
+char* stringify_integer(char* num, int i);
+
+char* stringify_double(char* num, double f);
+
 #endif

@@ -53,6 +53,12 @@ void uart_write_through_dma(char* str, unsigned int bytes_to_write)
 
 int uart_read(char* str, unsigned int bytes_to_read)
 {
+	while(bytes_to_read > 0)
+	{
+		*str = uart_read_byte();
+		str++;
+		bytes_to_read--;
+	}
 }
 
 int uart_destroy()

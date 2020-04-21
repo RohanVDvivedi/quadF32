@@ -7,6 +7,7 @@
 #include<sysclock/sysclock.h>
 #include<uart/uart.h>
 #include<i2c/i2c.h>
+#include<backup_data/backup_data.h>
 
 #include<gy86/gy86.h>
 #include<bldc/quad_bldc.h>
@@ -32,26 +33,15 @@ void main(void)
 	i2c_init();
 	uart_init(9600);
 
-	mpu_init();
+	//mpu_init();
 
-	uint8_t dev_addr = 0;
-	char c_dev_addr[3]; c_dev_addr[2] = '\n';
-	while(dev_addr < 0x7f)
-	{
-		delay_for_ms(10);
-		if(i2c_detect(dev_addr))
-		{
-			stringify_8(c_dev_addr, dev_addr);
-			uart_write_blocking(c_dev_addr, 3);
-		}
-		dev_addr++;
-	}
+	backup_data_init();
 
 	while(1)
 	{
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
-		MPUdatascaled mpuData;
+		/*MPUdatascaled mpuData;
 		get_scaled_MPUdata(&mpuData);
 
 		char c_sensed[128];
@@ -59,8 +49,57 @@ void main(void)
 		end = stringify_double(end, mpuData.accl.xi);*end = '\t';end++;*end = '\t';end++;
 		end = stringify_double(end, mpuData.accl.yj);*end = '\t';end++;*end = '\t';end++;
 		end = stringify_double(end, mpuData.accl.zk);*end = '\n';end++;
-		uart_write_blocking(c_sensed, end - c_sensed);
+		uart_write_blocking(c_sensed, end - c_sensed);*/
 
-		delay_for_ms(100);
+		char op;
+		char c_addr[2];
+		char c_resp[128];
+
+		uart_read(&op, 1);
+		uart_write_blocking(&op, 1);
+		uart_write_blocking("\n", 1);
+
+		uart_read(c_addr, 2);
+		uart_write_blocking(c_addr, 2);
+		int addr = numify_integer(c_addr);
+
+		switch(op)
+		{
+			case 'w' :
+			{
+				char c_data_w[3];
+				char c_data_f[3];
+				uart_read(c_data_w, 3);
+				uart_read(c_data_f, 3);
+				double data = ((double)(numify_integer(c_data_w))) + ((double)(numify_integer(c_data_f))) / 1000;
+				
+				char c_resp[128];
+				char* end = c_resp;
+				end = stringify_double(end, data);*end = '\n';end++;
+				uart_write_blocking(c_resp, end - c_resp);
+
+				write_backup_data(addr, data);
+
+				uart_write_blocking("done\n", 5);
+				break;
+			}
+			case 'r' :
+			{
+				uart_write_blocking(" => ", 4);
+
+				char c_resp[128];
+				char* end = c_resp;
+				end = stringify_double(end, read_backup_data(addr));*end = '\n';end++;
+				uart_write_blocking(c_resp, end - c_resp);
+				break;
+			}
+			default :
+			{
+				uart_write_blocking("default operation\n", 18);
+				break;
+			}
+		}
+
+		//delay_for_ms(1000);
 	}
 }

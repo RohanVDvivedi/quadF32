@@ -123,6 +123,36 @@ char* stringify_integer(char* num, int i)
 	return num;
 }
 
+int numify_integer(char* num)
+{
+	int neg = 0;
+	int result = 0;
+	if(*num == '-')
+	{
+		neg = 1;
+		num++;
+	}
+
+	while(1)
+	{
+		if('0' <= *num && *num <= '9')
+		{
+			result = result * 10 + (*num - '0');
+		}
+		else
+		{
+			break;
+		}
+		num++;
+	}
+
+	if(neg)
+	{
+		result = -result;
+	}
+	return result;
+}
+
 char* stringify_double(char* num, double f)
 {
 	if(f != f)

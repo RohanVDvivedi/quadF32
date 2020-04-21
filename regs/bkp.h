@@ -11,9 +11,6 @@ struct BKP_t
 	uint32_t BKP_RTCCR;
 	uint32_t BKP_CR;
 	uint32_t BKP_CSR;
-	uint32_t RESERVED2;
-	uint32_t RESERVED3;
-	uint32_t BKP_DR_2[32];
 };
 
 #define BKP ((volatile BKP_t*)(0x40006C00))

@@ -67,6 +67,8 @@ void main(void)
 		{
 			case 'w' :
 			{
+				uart_write_blocking(" => ", 4);
+				
 				char c_data_w[3];
 				char c_data_f[3];
 				uart_read(c_data_w, 3);
@@ -78,9 +80,14 @@ void main(void)
 				end = stringify_double(end, data);*end = '\n';end++;
 				uart_write_blocking(c_resp, end - c_resp);
 
-				write_backup_data(addr, data);
-
-				uart_write_blocking("done\n", 5);
+				if(write_backup_data(addr, data))
+				{
+					uart_write_blocking("done\n", 5);
+				}
+				else
+				{
+					uart_write_blocking("fail\n", 5);
+				}
 				break;
 			}
 			case 'r' :

@@ -6,7 +6,9 @@ void backup_data_init()
 	PWR->PWR_CR |= (1<<8);
 }
 
-#define FLOAT_FACTOR 700
+// each bit in the 16 bit number weights 1/FLOAT_FACTOR times
+// FLOAT_FACTOR of 328 gives us range of (approx) -99.9 to +99.9, with precission of (approx) 0.003 decimal value
+#define FLOAT_FACTOR 328
 
 int write_backup_data(uint8_t index, double data)
 {
@@ -14,10 +16,6 @@ int write_backup_data(uint8_t index, double data)
 	if(index <= 9)
 	{
 		BKP->BKP_DR_1[index] = data_to_store;
-	}
-	else if(10 <= index && index <= 42)
-	{
-		BKP->BKP_DR_2[index-10] = data_to_store;
 	}
 	else
 	{
@@ -28,14 +26,10 @@ int write_backup_data(uint8_t index, double data)
 
 double read_backup_data(uint8_t index)
 {
-	int16_t data_stored = 0;
+	int16_t data_stored;
 	if(index <= 9)
 	{
 		data_stored = BKP->BKP_DR_1[index];
-	}
-	else if(10 <= index && index <= 42)
-	{
-		data_stored = BKP->BKP_DR_2[index-10];
 	}
 	double data = ((double)(data_stored)) / FLOAT_FACTOR;
 	return data;

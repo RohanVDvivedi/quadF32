@@ -7,7 +7,7 @@ typedef struct BKP_t BKP_t;
 struct BKP_t
 {
 	uint32_t RESERVED1;
-	uint32_t BKP_DR_1[10];
+	uint32_t BKP_DR[10];
 	uint32_t BKP_RTCCR;
 	uint32_t BKP_CR;
 	uint32_t BKP_CSR;

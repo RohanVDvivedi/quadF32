@@ -15,7 +15,7 @@ int write_backup_data(uint8_t index, double data)
 	int16_t data_to_store = ((int16_t)(data * FLOAT_FACTOR));
 	if(index <= 9)
 	{
-		BKP->BKP_DR_1[index] = data_to_store;
+		BKP->BKP_DR[index] = data_to_store;
 	}
 	else
 	{
@@ -29,7 +29,7 @@ double read_backup_data(uint8_t index)
 	int16_t data_stored;
 	if(index <= 9)
 	{
-		data_stored = BKP->BKP_DR_1[index];
+		data_stored = BKP->BKP_DR[index];
 	}
 	double data = ((double)(data_stored)) / FLOAT_FACTOR;
 	return data;

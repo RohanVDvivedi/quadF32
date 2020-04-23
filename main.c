@@ -15,7 +15,8 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-#define map(val, a_min, a_max, b_min, b_max)	(((double)val) * (b_max - b_min)) / (a_max - a_min);
+#define map(val, a_min, a_max, b_min, b_max)	b_min + ((((double)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
+#define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
 void main(void)
 {
@@ -68,10 +69,14 @@ void main(void)
 		uint32_t chan_ret[6];
 		get_rc_channels(chan_ret);
 
-		double throttle = chan_ret[4];
-		double x_rc_req = map(chan_ret[6], 0.0, 1000.0, -30.0, 30.0);
-		double y_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
-		double z_rc_req = map(chan_ret[3], 0.0, 1000.0, -30.0, 30.0);
+		double throttle = chan_ret[3];
+		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
+		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -30.0, 30.0);
+		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 30.0, -30.0);
+
+		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
+		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
+		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
 		double x_motor_corr = 0;
 		double y_motor_corr = 0;
@@ -96,6 +101,17 @@ void main(void)
 		uint32_t motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
 
 		set_motors(motor_LF, motor_LF, motor_LF, motor_LF);
+
+		char print_str[256];
+		char* end_ps = print_str;
+
+		end_ps = stringify_double(end_ps, throttle); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_double(end_ps, x_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_double(end_ps, y_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_double(end_ps, z_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		
+		*end_ps = '\n'; end_ps++;
+		uart_write_blocking(print_str, end_ps - print_str);
 
 		delay_for_ms(1000);
 	}

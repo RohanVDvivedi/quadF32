@@ -1,6 +1,16 @@
 #include<pid/pid.h>
 
-void pid_init(pid_state* pid)
+void pid_init(pid_state* pid, double Kp, double Ki, double Kd, double range)
+{
+	pid->previous_value    = NAN;
+	pid->accumulated_error = 0.0;
+	pid->constants.Kp = Kp;
+	pid->constants.Ki = Ki;
+	pid->constants.Kd = Kd;
+	pid->constants.range = range;
+}
+
+void pid_reinit(pid_state* pid)
 {
 	pid->previous_value    = NAN;
 	pid->accumulated_error = 0.0;

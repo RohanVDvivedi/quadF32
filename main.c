@@ -9,9 +9,13 @@
 #include<i2c/i2c.h>
 #include<backup_data/backup_data.h>
 
+#include<pid/pid.h>
+
 #include<gy86/gy86.h>
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
+
+#define map(val, a_min, a_max, b_min, b_max)	(((double)val) * (b_max - b_min)) / (a_max - a_min);
 
 void main(void)
 {
@@ -30,96 +34,69 @@ void main(void)
 
 	// init rtc clock
 	rtc_init();
+
+	// setup communications
 	i2c_init();
 	uart_init(9600);
 
-	//mpu_init();
+	// initialize rc receiver
+	init_rc_receiver();
 
+	// initialize motors
+	init_bldc();
+	set_motors(0, 0, 0, 0);
+
+	// without backup data pid can not be initialized
 	backup_data_init();
+
+	// initialize all necessary sensors
+	mpu_init();
+
+	// initialize pid variables
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 0, 0, 0, 300);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
+
 
 	while(1)
 	{
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
-		/*MPUdatascaled mpuData;
+		MPUdatascaled mpuData;
 		get_scaled_MPUdata(&mpuData);
 
-		char c_sensed[128];
-		char* end = c_sensed;
-		end = stringify_double(end, mpuData.accl.xi);*end = '\t';end++;*end = '\t';end++;
-		end = stringify_double(end, mpuData.accl.yj);*end = '\t';end++;*end = '\t';end++;
-		end = stringify_double(end, mpuData.accl.zk);*end = '\n';end++;
-		uart_write_blocking(c_sensed, end - c_sensed);*/
+		uint32_t chan_ret[6];
+		get_rc_channels(chan_ret);
 
-		char op;
-		char c_addr[2];
-		char c_resp[128];
+		double throttle = chan_ret[4];
+		double x_rc_req = map(chan_ret[6], 0.0, 1000.0, -30.0, 30.0);
+		double y_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
+		double z_rc_req = map(chan_ret[3], 0.0, 1000.0, -30.0, 30.0);
 
-		uart_read(&op, 1);
-		uart_write_blocking(&op, 1);
-		uart_write_blocking("\n", 1);
+		double x_motor_corr = 0;
+		double y_motor_corr = 0;
+		double z_motor_corr = 0;
 
-		switch(op)
+		if(throttle < 200)
 		{
-			case 'w' :
-			{
-				uart_read(c_addr, 2);
-				uart_write_blocking(c_addr, 2);
-				int addr = numify_integer(c_addr);
-
-				uart_write_blocking(" => ", 4);
-				
-				char c_data_w[3];
-				char c_data_f[3];
-				uart_read(c_data_w, 3);
-				uart_read(c_data_f, 3);
-				double data = ((double)( (numify_integer(c_data_w) * 1000) + numify_integer(c_data_f) )) / 1000.0;
-				
-				char c_resp[128];
-
-				char* end = c_resp;
-				end = stringify_integer(end, numify_integer(c_data_w));*end = '\n';end++;
-				uart_write_blocking(c_resp, end - c_resp);
-
-				end = c_resp;
-				end = stringify_integer(end, numify_integer(c_data_f));*end = '\n';end++;
-				uart_write_blocking(c_resp, end - c_resp);
-
-				end = c_resp;
-				end = stringify_double(end, data);*end = '\n';end++;
-				uart_write_blocking(c_resp, end - c_resp);
-
-				if(write_backup_data(addr, data))
-				{
-					uart_write_blocking("done\n", 5);
-				}
-				else
-				{
-					uart_write_blocking("fail\n", 5);
-				}
-				break;
-			}
-			case 'r' :
-			{
-				uart_read(c_addr, 2);
-				uart_write_blocking(c_addr, 2);
-				int addr = numify_integer(c_addr);
-
-				uart_write_blocking(" => ", 4);
-
-				char c_resp[128];
-				char* end = c_resp;
-				end = stringify_double(end, read_backup_data(addr));*end = '\n';end++;
-				uart_write_blocking(c_resp, end - c_resp);
-				break;
-			}
-			default :
-			{
-				uart_write_blocking("default operation\n", 18);
-				break;
-			}
+			pid_reinit(&x_rate_pid);
+			pid_reinit(&y_rate_pid);
+			pid_reinit(&z_rate_pid);
+		}
+		else
+		{
+			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rc_req);
+			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.xi, y_rc_req);
+			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.xi, z_rc_req);
 		}
 
-		//delay_for_ms(1000);
+		uint32_t motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
+		uint32_t motor_RF = throttle - x_motor_corr - y_motor_corr - z_motor_corr;
+		uint32_t motor_LB = throttle + x_motor_corr + y_motor_corr - z_motor_corr;
+		uint32_t motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
+
+		set_motors(motor_LF, motor_LF, motor_LF, motor_LF);
+
+		delay_for_ms(1000);
 	}
 }

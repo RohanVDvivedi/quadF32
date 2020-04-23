@@ -20,7 +20,9 @@ struct pid_state
 	double accumulated_error;
 };
 
-void pid_init(pid_state* pid);
+void pid_init(pid_state* pid, double Kp, double Ki, double Kd, double range);
+
+void pid_reinit(pid_state* pid);
 
 // it is your responsibility to call pid_update at a regular interval in your program
 double pid_update(pid_state* pid, double current_value, double set_point);

@@ -91,8 +91,8 @@ void main(void)
 		else
 		{
 			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rc_req);
-			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.xi, y_rc_req);
-			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.xi, z_rc_req);
+			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rc_req);
+			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
 		}
 
 		uint32_t motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
@@ -105,14 +105,14 @@ void main(void)
 		char print_str[256];
 		char* end_ps = print_str;
 
-		end_ps = stringify_double(end_ps, throttle); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_double(end_ps, x_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_double(end_ps, y_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_double(end_ps, z_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_integer(end_ps, motor_LF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		
 		*end_ps = '\n'; end_ps++;
 		uart_write_blocking(print_str, end_ps - print_str);
 
-		delay_for_ms(1000);
+		delay_for_ms(100);
 	}
 }

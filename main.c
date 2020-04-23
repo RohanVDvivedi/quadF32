@@ -67,7 +67,7 @@ void main(void)
 		get_scaled_MPUdata(&mpuData);
 
 		uint32_t chan_ret[6];
-		get_rc_channels(chan_ret);
+		int is_rc_active = get_rc_channels(chan_ret);
 
 		double throttle = chan_ret[3];
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
@@ -105,6 +105,7 @@ void main(void)
 		char print_str[256];
 		char* end_ps = print_str;
 
+		end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		end_ps = stringify_integer(end_ps, motor_LF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;

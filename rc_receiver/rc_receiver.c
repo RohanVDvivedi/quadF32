@@ -4,6 +4,9 @@
 static volatile uint32_t channel_start[6];
 static volatile uint32_t channel_value[6];
 
+// it stores the last microsecond time, when the rc receiver actively provided values
+static volatile uint64_t last_rc_value_micros = 0;
+
 void edge_interrupt_rc_channel(void);
 
 #define VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15 		40
@@ -95,6 +98,8 @@ void edge_interrupt_rc_channel(void)
 
 	EXTI->EXTI_PR |= clear_pending;
 	NVIC->NVIC_ICPR[1] |= (1<<(VECTOR_TABLE_ENTRY_POSITION_EXTI_10_15-32));
+
+	last_rc_value_micros = get_now_micros();
 }
 
 static uint32_t compare_and_map_and_range(uint32_t value)
@@ -111,11 +116,20 @@ static uint32_t compare_and_map_and_range(uint32_t value)
 	return value;
 }
 
-void get_rc_channels(uint32_t chan_ret[6])
+int get_rc_channels(uint32_t chan_ret[6])
 {
+	// if no rc receiver interrupt is generated in past 50 ms, we mark that the rc receiver is inactive
+	int is_rc_receiver_active = 1;
+	if((get_now_micros() - last_rc_value_micros > 50000) || (last_rc_value_micros == 0))
+	{
+		is_rc_receiver_active = 0;
+	}
+
 	int iter_ch;
 	for(iter_ch = 0; iter_ch < 6; iter_ch++)
 	{
-		chan_ret[iter_ch] = compare_and_map_and_range(channel_value[iter_ch]);
+		chan_ret[iter_ch] = is_rc_receiver_active ? compare_and_map_and_range(channel_value[iter_ch]) : 0;
 	}
+
+	return is_rc_receiver_active;
 }

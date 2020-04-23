@@ -8,8 +8,10 @@
 #include<regs/afio.h>
 #include<regs/timer.h>
 
+#include<rtcclock/rtcclock.h>
+
 void init_rc_receiver();
 
-void get_rc_channels(uint32_t chan_ret[6]);
+int get_rc_channels(uint32_t chan_ret[6]);
 
 #endif

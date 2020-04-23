@@ -18,6 +18,11 @@
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((double)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
+#define max2(a, b)			((a > b) ? a : b)
+#define min2(a, b)			((a < b) ? a : b)
+#define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
+#define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
+
 void main(void)
 {
 	// setup clock to run at 72 MHz
@@ -95,12 +100,33 @@ void main(void)
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
 		}
 
-		uint32_t motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
-		uint32_t motor_RF = throttle - x_motor_corr - y_motor_corr - z_motor_corr;
-		uint32_t motor_LB = throttle + x_motor_corr + y_motor_corr - z_motor_corr;
-		uint32_t motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
+		double motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
+		double motor_RF = throttle - x_motor_corr - y_motor_corr - z_motor_corr;
+		double motor_LB = throttle + x_motor_corr + y_motor_corr - z_motor_corr;
+		double motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
 
-		set_motors(motor_LF, motor_LF, motor_LF, motor_LF);
+		double min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
+		double max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);
+
+		if(min_val < 0.0)
+		{
+			double diff = 0.0 - min_val;
+			motor_LF += diff;
+			motor_RF += diff;
+			motor_LB += diff;
+			motor_RB += diff;
+		}
+
+		if(max_val > 1000.0)
+		{
+			double diff = max_val - 1000.0;
+			motor_LF -= diff;
+			motor_RF -= diff;
+			motor_LB -= diff;
+			motor_RB -= diff;
+		}
+
+		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
 
 		char print_str[256];
 		char* end_ps = print_str;

@@ -59,24 +59,33 @@ void main(void)
 		uart_write_blocking(&op, 1);
 		uart_write_blocking("\n", 1);
 
-		uart_read(c_addr, 2);
-		uart_write_blocking(c_addr, 2);
-		int addr = numify_integer(c_addr);
-
 		switch(op)
 		{
 			case 'w' :
 			{
+				uart_read(c_addr, 2);
+				uart_write_blocking(c_addr, 2);
+				int addr = numify_integer(c_addr);
+
 				uart_write_blocking(" => ", 4);
 				
 				char c_data_w[3];
 				char c_data_f[3];
 				uart_read(c_data_w, 3);
 				uart_read(c_data_f, 3);
-				double data = ((double)(numify_integer(c_data_w))) + ((double)(numify_integer(c_data_f))) / 1000;
+				double data = ((double)( (numify_integer(c_data_w) * 1000) + numify_integer(c_data_f) )) / 1000.0;
 				
 				char c_resp[128];
+
 				char* end = c_resp;
+				end = stringify_integer(end, numify_integer(c_data_w));*end = '\n';end++;
+				uart_write_blocking(c_resp, end - c_resp);
+
+				end = c_resp;
+				end = stringify_integer(end, numify_integer(c_data_f));*end = '\n';end++;
+				uart_write_blocking(c_resp, end - c_resp);
+
+				end = c_resp;
 				end = stringify_double(end, data);*end = '\n';end++;
 				uart_write_blocking(c_resp, end - c_resp);
 
@@ -92,6 +101,10 @@ void main(void)
 			}
 			case 'r' :
 			{
+				uart_read(c_addr, 2);
+				uart_write_blocking(c_addr, 2);
+				int addr = numify_integer(c_addr);
+
 				uart_write_blocking(" => ", 4);
 
 				char c_resp[128];

@@ -123,6 +123,60 @@ char* stringify_integer(char* num, int i)
 	return num;
 }
 
+char* stringify_integer_fixed_min_digits(char* num, int i, int min_digits)
+{
+	if(i == 0)
+	{
+		*num = '0';num++;
+	}
+	else
+	{
+		if(i < 0)
+		{
+			*num = '-';num++;
+			i = -i;
+		}
+
+		char* start = num;
+	    while(i > 0)
+		{
+			*num = (i % 10) + '0';
+			num++;
+			i /= 10;
+		}
+
+		char* end = num - 1;
+
+		char* start_dig = start;
+		char* end_dig = end;
+
+    	while(start < end)
+		{
+			char temp = *start;
+			*start = *end;
+			*end = temp;
+			start++;
+			end--;
+		}
+
+		if(end_dig - start_dig + 1 < min_digits)
+		{
+			int extra_digits = min_digits - (end_dig - start_dig + 1);
+
+			char* iter = end_dig;
+			while(iter >= start_dig)
+			{
+				char temp = *iter;
+				*iter = '0';
+				*(iter + extra_digits) = temp;
+				iter--;
+			}
+			num += extra_digits;
+		}
+	}
+	return num;
+}
+
 int numify_integer(char* num)
 {
 	int neg = 0;
@@ -174,5 +228,5 @@ char* stringify_double(char* num, double f)
 
 	num = stringify_integer(num, whole);
 	*num = '.';num++;
-	return stringify_integer(num, fraction_wh);
+	return stringify_integer_fixed_min_digits(num, fraction_wh, 6);
 }

@@ -23,6 +23,13 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
+#define X_RATE_PID_CONSTANTS_INDEX 0
+#define Y_RATE_PID_CONSTANTS_INDEX X_RATE_PID_CONSTANTS_INDEX + 3
+#define Z_RATE_PID_CONSTANTS_INDEX Y_RATE_PID_CONSTANTS_INDEX + 3
+
+#define PID_TO_TUNE_IND X_RATE_PID_CONSTANTS_INDEX
+#define PID_TO_TUNE_VAR x_rate_pid
+
 void main(void)
 {
 	// setup clock to run at 72 MHz
@@ -59,10 +66,9 @@ void main(void)
 	mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 0, 0, 0, 300);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
-
+	pid_state x_rate_pid; pid_init(&x_rate_pid, read_backup_data(X_RATE_PID_CONSTANTS_INDEX), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+2), 300);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, read_backup_data(Y_RATE_PID_CONSTANTS_INDEX), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+2), 300);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, read_backup_data(Z_RATE_PID_CONSTANTS_INDEX), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+2), 300);
 
 	while(1)
 	{
@@ -78,6 +84,8 @@ void main(void)
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
 		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -30.0, 30.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 30.0, -30.0);
+		double aux1 = ((double) chan_ret[0]) / 10;
+		double aux2 = ((double) chan_ret[1]) / 10;
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
@@ -95,6 +103,12 @@ void main(void)
 		}
 		else
 		{
+			#if defined PID_TO_TUNE
+				write_backup_data(PID_TO_TUNE_IND, aux1);
+				write_backup_data(PID_TO_TUNE_IND+1, aux2);
+				pid_init(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
+			#endif
+
 			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rc_req);
 			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rc_req);
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);

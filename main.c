@@ -27,8 +27,8 @@
 #define Y_RATE_PID_CONSTANTS_INDEX X_RATE_PID_CONSTANTS_INDEX + 3
 #define Z_RATE_PID_CONSTANTS_INDEX Y_RATE_PID_CONSTANTS_INDEX + 3
 
-#define PID_TO_TUNE_IND X_RATE_PID_CONSTANTS_INDEX
-#define PID_TO_TUNE_VAR x_rate_pid
+//#define PID_TO_TUNE_IND X_RATE_PID_CONSTANTS_INDEX
+//#define PID_TO_TUNE_VAR x_rate_pid
 
 void main(void)
 {
@@ -69,6 +69,10 @@ void main(void)
 	pid_state x_rate_pid; pid_init(&x_rate_pid, read_backup_data(X_RATE_PID_CONSTANTS_INDEX), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+2), 300);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, read_backup_data(Y_RATE_PID_CONSTANTS_INDEX), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+2), 300);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, read_backup_data(Z_RATE_PID_CONSTANTS_INDEX), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+2), 300);
+	// test
+	pid_init(&x_rate_pid, 10, 0, 0, 300);
+	pid_init(&y_rate_pid, 10, 0, 0, 300);
+	pid_init(&z_rate_pid, 10, 0, 0, 300);
 
 	while(1)
 	{
@@ -103,7 +107,7 @@ void main(void)
 		}
 		else
 		{
-			#if defined PID_TO_TUNE
+			#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
 				write_backup_data(PID_TO_TUNE_IND, aux1);
 				write_backup_data(PID_TO_TUNE_IND+1, aux2);
 				pid_init(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
@@ -142,7 +146,7 @@ void main(void)
 
 		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
 
-		char print_str[256];
+		/*char print_str[256];
 		char* end_ps = print_str;
 
 		end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -152,8 +156,8 @@ void main(void)
 		end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		
 		*end_ps = '\n'; end_ps++;
-		uart_write_blocking(print_str, end_ps - print_str);
+		uart_write_blocking(print_str, end_ps - print_str);*/
 
-		delay_for_ms(100);
+		delay_for_ms(10);
 	}
 }

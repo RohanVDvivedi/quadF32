@@ -9,6 +9,8 @@
 
 void backup_data_init();
 
+int compareBackupDoubleValues(double a, double b);
+
 // returns 1,if write succeeded
 int write_backup_data(uint8_t index, double data);
 

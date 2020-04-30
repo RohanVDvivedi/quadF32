@@ -18,20 +18,9 @@ void pid_reinit(pid_state* pid)
 
 void pid_update_constants(pid_state* pid, double Kp, double Ki, double Kd)
 {
-	if(pid->constants.Kp != Kp)
-	{
-		pid->constants.Kp = Kp;
-	}
-	if(pid->constants.Ki != Ki)
-	{
-		pid->accumulated_error = 0.0;
-		pid->constants.Ki      = Ki;
-	}
-	if(pid->constants.Kd != Kd)
-	{
-		pid->previous_value    = NAN;
-		pid->constants.Kd      = Kd;
-	}
+	pid->constants.Kp = Kp;
+	pid->constants.Ki = Ki;
+	pid->constants.Kd = Kd;
 }
 
 double pid_update(pid_state* pid, double current_value, double set_point)

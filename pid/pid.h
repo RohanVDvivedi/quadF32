@@ -24,7 +24,7 @@ void pid_init(pid_state* pid, double Kp, double Ki, double Kd, double range);
 
 void pid_reinit(pid_state* pid);
 
-// updating pid constants will reinitialize necessary parts of pis that need reinitialization
+// updates pid constants
 void pid_update_constants(pid_state* pid, double Kp, double Ki, double Kd);
 
 // it is your responsibility to call pid_update at a regular interval in your program

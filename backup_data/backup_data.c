@@ -10,6 +10,36 @@ void backup_data_init()
 // FLOAT_FACTOR of 328 gives us range of (approx) -99.9 to +99.9, with precission of (approx) 0.003 decimal value
 #define FLOAT_FACTOR 328
 
+int compareBackupDoubleValues(double a, double b)
+{
+	if(a - b > 0)
+	{
+		if(a - b <= (1.0/FLOAT_FACTOR))
+		{
+			return 0;
+		}
+		else
+		{
+			return 1;
+		}
+	}
+	else if(a - b < 0)
+	{
+		if(b - a <= (1.0/FLOAT_FACTOR))
+		{
+			return 0;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 int write_backup_data(uint8_t index, double data)
 {
 	int16_t data_to_store = ((int16_t)(data * FLOAT_FACTOR));

@@ -116,8 +116,8 @@ void main(void)
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
 		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -30.0, 30.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 30.0, -30.0);
-		double aux1 = ((double) chan_ret[0]) / 10;
-		double aux2 = ((double) chan_ret[1]) / 10;
+		double aux1 = ((double) chan_ret[1]) / 100;
+		double aux2 = ((double) chan_ret[0]) / 100;
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
@@ -174,7 +174,6 @@ void main(void)
 
 		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
 
-/*
 		char print_str[256];
 		char* end_ps = print_str;
 
@@ -183,11 +182,14 @@ void main(void)
 		end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		
+		end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+		end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+
 		*end_ps = '\n'; end_ps++;
 		uart_write_blocking(print_str, end_ps - print_str);
-*/
 
 		delay_until_us(begin_micros + 2500);
+
+		delay_for_ms(100);
 	}
 }

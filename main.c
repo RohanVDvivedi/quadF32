@@ -27,8 +27,8 @@
 #define Y_RATE_PID_CONSTANTS_INDEX X_RATE_PID_CONSTANTS_INDEX + 3
 #define Z_RATE_PID_CONSTANTS_INDEX Y_RATE_PID_CONSTANTS_INDEX + 3
 
-//#define PID_TO_TUNE_IND X_RATE_PID_CONSTANTS_INDEX
-//#define PID_TO_TUNE_VAR x_rate_pid
+#define PID_TO_TUNE_IND Y_RATE_PID_CONSTANTS_INDEX
+#define PID_TO_TUNE_VAR y_rate_pid
 
 void main(void)
 {
@@ -65,17 +65,45 @@ void main(void)
 	// initialize all necessary sensors
 	mpu_init();
 
+	// zero out the pid values if the mode is tuning
+	#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
+		{
+			int index;for(index=0; index<10; index++)
+			{
+				write_backup_data(index, 0);
+			}
+		}
+	#endif
+
 	// initialize pid variables
 	pid_state x_rate_pid; pid_init(&x_rate_pid, read_backup_data(X_RATE_PID_CONSTANTS_INDEX), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+2), 300);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, read_backup_data(Y_RATE_PID_CONSTANTS_INDEX), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+2), 300);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, read_backup_data(Z_RATE_PID_CONSTANTS_INDEX), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+2), 300);
-	// test
+	// flyable values
+	/*
 	pid_init(&x_rate_pid, 10, 0, 0, 300);
 	pid_init(&y_rate_pid, 10, 0, 0, 300);
 	pid_init(&z_rate_pid, 10, 0, 0, 300);
+	*/
+	// test bench empirical values
+	/*
+	pid_init(&x_rate_pid, 10, 0, 0, 300);
+	pid_init(&y_rate_pid, 10, 0, 0, 300);
+	pid_init(&z_rate_pid, 10, 0, 0, 300);
+	*/
+	// test
+	/*
+	pid_init(&x_rate_pid, 10, 0, 0, 300);
+	pid_init(&y_rate_pid, 10, 0, 0, 300);
+	pid_init(&z_rate_pid, 10, 0, 0, 300);
+	*/
+
+	uint64_t begin_micros;
 
 	while(1)
 	{
+		begin_micros = get_now_micros();
+
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
 		MPUdatascaled mpuData;
@@ -110,7 +138,7 @@ void main(void)
 			#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
 				write_backup_data(PID_TO_TUNE_IND, aux1);
 				write_backup_data(PID_TO_TUNE_IND+1, aux2);
-				pid_init(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
+				pid_update_constants(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
 			#endif
 
 			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rc_req);
@@ -146,7 +174,8 @@ void main(void)
 
 		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
 
-		/*char print_str[256];
+/*
+		char print_str[256];
 		char* end_ps = print_str;
 
 		end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -156,8 +185,9 @@ void main(void)
 		end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 		
 		*end_ps = '\n'; end_ps++;
-		uart_write_blocking(print_str, end_ps - print_str);*/
+		uart_write_blocking(print_str, end_ps - print_str);
+*/
 
-		delay_for_ms(10);
+		delay_until_us(begin_micros + 2500);
 	}
 }

@@ -116,10 +116,10 @@ void main(void)
 		int is_rc_active = get_rc_channels(chan_ret);
 
 		double throttle = chan_ret[3];
-		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -5.0, 5.0);
-		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -5.0, 5.0);
-		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 5.0, -5.0);
-		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 10.0);
+		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
+		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
+		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
+		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 1000.0);
 		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 10.0);
 
 		#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
@@ -149,10 +149,10 @@ void main(void)
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
 		}
 
-		double motor_LF = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
-		double motor_RF = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
-		double motor_LB = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
-		double motor_RB = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
+		double motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
+		double motor_RF = throttle - x_motor_corr - y_motor_corr - z_motor_corr;
+		double motor_LB = throttle + x_motor_corr + y_motor_corr - z_motor_corr;
+		double motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
 
 		double min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
 		double max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);

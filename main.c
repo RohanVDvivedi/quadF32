@@ -119,6 +119,12 @@ void main(void)
 		double aux1 = ((double) chan_ret[1]) / 100;
 		double aux2 = ((double) chan_ret[0]) / 100;
 
+		#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
+			write_backup_data(PID_TO_TUNE_IND, aux1);
+			write_backup_data(PID_TO_TUNE_IND+1, aux2);
+			pid_update_constants(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
+		#endif
+
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
@@ -135,12 +141,6 @@ void main(void)
 		}
 		else
 		{
-			#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
-				write_backup_data(PID_TO_TUNE_IND, aux1);
-				write_backup_data(PID_TO_TUNE_IND+1, aux2);
-				pid_update_constants(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
-			#endif
-
 			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rc_req);
 			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rc_req);
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);

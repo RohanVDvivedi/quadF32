@@ -50,7 +50,7 @@ void main(void)
 
 	// setup communications
 	i2c_init();
-	uart_init(9600);
+	uart_init(2000000);
 
 	// initialize rc receiver
 	init_rc_receiver();
@@ -100,6 +100,9 @@ void main(void)
 
 	uint64_t begin_micros;
 
+	uint64_t print_iter = 0;
+	char print_str[256];
+
 	while(1)
 	{
 		begin_micros = get_now_micros();
@@ -113,11 +116,11 @@ void main(void)
 		int is_rc_active = get_rc_channels(chan_ret);
 
 		double throttle = chan_ret[3];
-		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -30.0, 30.0);
-		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -30.0, 30.0);
-		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 30.0, -30.0);
-		double aux1 = ((double) chan_ret[1]) / 100;
-		double aux2 = ((double) chan_ret[0]) / 100;
+		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -5.0, 5.0);
+		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -5.0, 5.0);
+		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 5.0, -5.0);
+		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 10.0);
+		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 10.0);
 
 		#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
 			write_backup_data(PID_TO_TUNE_IND, aux1);
@@ -146,10 +149,10 @@ void main(void)
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
 		}
 
-		double motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
-		double motor_RF = throttle - x_motor_corr - y_motor_corr - z_motor_corr;
-		double motor_LB = throttle + x_motor_corr + y_motor_corr - z_motor_corr;
-		double motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
+		double motor_LF = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
+		double motor_RF = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
+		double motor_LB = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
+		double motor_RB = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
 
 		double min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
 		double max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);
@@ -174,19 +177,26 @@ void main(void)
 
 		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
 
-		/*char print_str[256];
-		char* end_ps = print_str;
+		if(print_iter == 100)
+		{
+			print_iter = 0;
+			char* end_ps = print_str;
 
-		end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_integer(end_ps, motor_LF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-		end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_integer(end_ps, motor_LF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-		*end_ps = '\n'; end_ps++;
-		uart_write_blocking(print_str, end_ps - print_str);*/
+			*end_ps = '\n'; end_ps++;
+			uart_write_through_dma(print_str, end_ps - print_str);
+		}
+		else
+		{
+			print_iter++;
+		}
 
 		delay_until_us(begin_micros + 2500);
 

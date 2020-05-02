@@ -23,11 +23,6 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
-#define X_RATE_PID_CONSTANTS_INDEX 0
-#define Y_RATE_PID_CONSTANTS_INDEX X_RATE_PID_CONSTANTS_INDEX + 3
-#define Z_RATE_PID_CONSTANTS_INDEX Y_RATE_PID_CONSTANTS_INDEX + 3
-
-#define PID_TO_TUNE_IND Y_RATE_PID_CONSTANTS_INDEX
 #define PID_TO_TUNE_VAR y_rate_pid
 
 void main(void)
@@ -59,26 +54,13 @@ void main(void)
 	init_bldc();
 	set_motors(0, 0, 0, 0);
 
-	// without backup data pid can not be initialized
-	backup_data_init();
-
 	// initialize all necessary sensors
 	mpu_init();
 
-	// zero out the pid values if the mode is tuning
-	#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
-		{
-			int index;for(index=0; index<10; index++)
-			{
-				write_backup_data(index, 0);
-			}
-		}
-	#endif
-
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, read_backup_data(X_RATE_PID_CONSTANTS_INDEX), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(X_RATE_PID_CONSTANTS_INDEX+2), 300);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, read_backup_data(Y_RATE_PID_CONSTANTS_INDEX), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Y_RATE_PID_CONSTANTS_INDEX+2), 300);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, read_backup_data(Z_RATE_PID_CONSTANTS_INDEX), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+1), read_backup_data(Z_RATE_PID_CONSTANTS_INDEX+2), 300);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 0, 0, 0, 300);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
 	// flyable values
 	/*
 	pid_init(&x_rate_pid, 10, 0, 0, 300);
@@ -120,12 +102,10 @@ void main(void)
 		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 1000.0);
-		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 10.0);
+		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 1000.0);
 
-		#if defined PID_TO_TUNE_IND && defined PID_TO_TUNE_VAR
-			write_backup_data(PID_TO_TUNE_IND, aux1);
-			write_backup_data(PID_TO_TUNE_IND+1, aux2);
-			pid_update_constants(&PID_TO_TUNE_VAR, read_backup_data(PID_TO_TUNE_IND), read_backup_data(PID_TO_TUNE_IND+1), read_backup_data(PID_TO_TUNE_IND+2));
+		#if defined PID_TO_TUNE_VAR
+			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);

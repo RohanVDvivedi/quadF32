@@ -174,7 +174,7 @@ void main(void)
 
 		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
 
-		char print_str[256];
+		/*char print_str[256];
 		char* end_ps = print_str;
 
 		end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -186,10 +186,10 @@ void main(void)
 		end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 		*end_ps = '\n'; end_ps++;
-		uart_write_blocking(print_str, end_ps - print_str);
+		uart_write_blocking(print_str, end_ps - print_str);*/
 
 		delay_until_us(begin_micros + 2500);
 
-		delay_for_ms(100);
+		//delay_for_ms(100);
 	}
 }

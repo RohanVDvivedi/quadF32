@@ -116,7 +116,7 @@ void main(void)
 		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 500.0);
-		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 50.0);
+		double aux2 = 0;//map(chan_ret[0], 0.0, 1000.0, 0.0, 5.0);
 
 		#if defined PID_TO_TUNE_VAR
 			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
@@ -196,7 +196,5 @@ void main(void)
 		}
 
 		delay_until_us(begin_micros + 2500);
-
-		//delay_for_ms(100);
 	}
 }

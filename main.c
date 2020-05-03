@@ -23,7 +23,7 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
-#define DEBUG_OVER_UART
+//#define DEBUG_OVER_UART
 #define PID_TO_TUNE_VAR y_rate_pid
 
 void main(void)
@@ -57,14 +57,16 @@ void main(void)
 
 	delay_for_ms(1000);
 
-	if(i2c_detect(0x68))
-	{
-		uart_write_blocking("MPU detected\n", 13);
-	}
-	else
-	{
-		uart_write_blocking("MPU not detected\n", 17);
-	}
+	#if defined DEBUG_OVER_UART
+		if(i2c_detect(0x68))
+		{
+			uart_write_blocking("MPU detected\n", 13);
+		}
+		else
+		{
+			uart_write_blocking("MPU not detected\n", 17);
+		}
+	#endif
 
 	// initialize all necessary sensors
 	mpu_init();

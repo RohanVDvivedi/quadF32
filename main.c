@@ -23,6 +23,7 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
+#define DEBUG_OVER_UART
 #define PID_TO_TUNE_VAR y_rate_pid
 
 void main(void)
@@ -53,6 +54,15 @@ void main(void)
 	// initialize motors
 	init_bldc();
 	set_motors(0, 0, 0, 0);
+
+	if(i2c_detect(0x68))
+	{
+		uart_write_blocking("MPU detected\n", 13);
+	}
+	else
+	{
+		uart_write_blocking("MPU not detected\n", 17);
+	}
 
 	// initialize all necessary sensors
 	mpu_init();
@@ -101,8 +111,8 @@ void main(void)
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
 		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
-		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 200.0);
-		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 10.0);
+		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 500.0);
+		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 50.0);
 
 		#if defined PID_TO_TUNE_VAR
 			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
@@ -116,7 +126,7 @@ void main(void)
 		double y_motor_corr = 0;
 		double z_motor_corr = 0;
 
-		if(throttle < 200)
+		if(throttle < 100)
 		{
 			pid_reinit(&x_rate_pid);
 			pid_reinit(&y_rate_pid);
@@ -160,18 +170,21 @@ void main(void)
 		if(print_iter == 100)
 		{
 			print_iter = 0;
-			char* end_ps = print_str;
 
-			end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-			end_ps = stringify_integer(end_ps, motor_LF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-			end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-			end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-			end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-			end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-			end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+			#if defined DEBUG_OVER_UART
+				char* end_ps = print_str;
 
-			*end_ps = '\n'; end_ps++;
-			uart_write_through_dma(print_str, end_ps - print_str);
+				end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_integer(end_ps, motor_LF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_double(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+
+				*end_ps = '\n'; end_ps++;
+				uart_write_through_dma(print_str, end_ps - print_str);
+			#endif
 		}
 		else
 		{

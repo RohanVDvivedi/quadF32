@@ -55,6 +55,8 @@ void main(void)
 	init_bldc();
 	set_motors(0, 0, 0, 0);
 
+	delay_for_ms(1000);
+
 	if(i2c_detect(0x68))
 	{
 		uart_write_blocking("MPU detected\n", 13);

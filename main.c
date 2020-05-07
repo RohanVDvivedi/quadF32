@@ -23,6 +23,8 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
+//#define CALIBRATE_ESC_ON_START_UP
+
 //#define DEBUG_OVER_UART
 #define PID_TO_TUNE_VAR y_rate_pid
 
@@ -53,6 +55,10 @@ void main(void)
 
 	// initialize motors
 	init_bldc();
+	#if defined CALIBRATE_ESC_ON_START_UP
+		set_motors(1000, 1000, 1000, 1000);
+		delay_for_ms(3000);
+	#endif
 	set_motors(0, 0, 0, 0);
 
 	delay_for_ms(1000);

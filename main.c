@@ -26,7 +26,7 @@
 //#define CALIBRATE_ESC_ON_START_UP
 
 //#define DEBUG_OVER_UART
-#define PID_TO_TUNE_VAR y_rate_pid
+#define PID_TO_TUNE_VAR /*y_rate_pid*/ /*x_rate_pid*/ z_rate_pid
 
 void main(void)
 {
@@ -121,8 +121,8 @@ void main(void)
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
 		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
-		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 500.0);
-		double aux2 = 0;//map(chan_ret[0], 0.0, 1000.0, 0.0, 5.0);
+		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 10.0);
+		double aux2 = 0;//map(chan_ret[0], 0.0, 1000.0, 0.0, 10.0);
 
 		#if defined PID_TO_TUNE_VAR
 			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
@@ -149,10 +149,10 @@ void main(void)
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
 		}
 
-		double motor_LF = throttle + x_motor_corr - y_motor_corr + z_motor_corr;
-		double motor_RF = throttle - x_motor_corr - y_motor_corr - z_motor_corr;
-		double motor_LB = throttle + x_motor_corr + y_motor_corr - z_motor_corr;
-		double motor_RB = throttle - x_motor_corr + y_motor_corr + z_motor_corr;
+		double motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
+		double motor_RF = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
+		double motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
+		double motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
 
 		double min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
 		double max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);

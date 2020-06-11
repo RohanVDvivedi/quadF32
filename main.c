@@ -123,7 +123,7 @@ void main(void)
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
 		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 5.0);
-			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[1];
+			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 2.0);
 
 		#if defined PID_TO_TUNE_VAR
@@ -192,6 +192,7 @@ void main(void)
 				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_double(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				*end_ps = '\n'; end_ps++;

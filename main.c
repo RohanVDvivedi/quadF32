@@ -90,7 +90,7 @@ void main(void)
 	// test bench empirical values
 	/*
 	pid_init(&x_rate_pid, 10, 0, 0, 300);
-	pid_init(&y_rate_pid, 10, 0, 0, 300);
+	pid_init(&y_rate_pid, 9.0, 0.002, 0, 300);
 	pid_init(&z_rate_pid, 10, 0, 0, 300);
 	*/
 	// test
@@ -119,12 +119,12 @@ void main(void)
 
 		double throttle = chan_ret[3];
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
-		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
+		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -50.0, 50.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 5.0);
+		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 30.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
-		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 2.0);
+		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
 
 		#if defined PID_TO_TUNE_VAR
 			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);

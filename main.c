@@ -23,6 +23,8 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
+#define GYRO_ACCL_MIX 0.98
+
 //#define CALIBRATE_ESC_ON_START_UP
 
 //#define DEBUG_OVER_UART
@@ -75,7 +77,7 @@ void main(void)
 	#endif
 
 	// initialize all necessary sensors
-	mpu_init();
+	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
@@ -105,14 +107,23 @@ void main(void)
 	uint64_t print_iter = 0;
 	char print_str[256];
 
+	double abs_roll = 0;
+	double abs_pitch = 0;
+
 	while(1)
 	{
+		double time_delta_in_seconds = ((double)(get_now_micros() - begin_micros))/1000000.0;
 		begin_micros = get_now_micros();
 
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
 		MPUdatascaled mpuData;
 		get_scaled_MPUdata(&mpuData);
+
+		abs_roll  = (abs_roll  + mpuData.gyro.xi * time_delta_in_seconds) * (GYRO_ACCL_MIX)
+		+ ((atan(mpuData.accl.yj/mpuData.accl.zk) - atan( mpuInit->accl.yj/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
+		abs_pitch = (abs_pitch + mpuData.gyro.yj * time_delta_in_seconds) * (GYRO_ACCL_MIX)
+		+ ((atan(-mpuData.accl.xi/mpuData.accl.zk) - atan(-mpuInit->accl.xi/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
 
 		uint32_t chan_ret[6];
 		int is_rc_active = get_rc_channels(chan_ret);
@@ -191,8 +202,8 @@ void main(void)
 				end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_double(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_double(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_double(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_double(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_double(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				*end_ps = '\n'; end_ps++;

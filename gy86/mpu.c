@@ -92,23 +92,23 @@ int get_scaled_MPUdata(MPUdatascaled* result)
     data.gyroz = (data.gyroz << 8) | ((data.gyroz >> 8) & 0x00ff);
 
     // in m/s2, meter per second square => sensitivity = +/-2g = +/-19.6
-    result->accl.xi = ((((double)(data.acclx)) * 19.6) / 32768.0) - offsets.accl.xi;
-    result->accl.yj = ((((double)(data.accly)) * 19.6) / 32768.0) - offsets.accl.yj;
-    result->accl.zk = ((((double)(data.acclz)) * 19.6) / 32768.0) - offsets.accl.zk;
+    result->accl.xi = ((((float)(data.acclx)) * 19.6) / 32768.0) - offsets.accl.xi;
+    result->accl.yj = ((((float)(data.accly)) * 19.6) / 32768.0) - offsets.accl.yj;
+    result->accl.zk = ((((float)(data.acclz)) * 19.6) / 32768.0) - offsets.accl.zk;
 
     // temperature is in degree celcius
-    result->temp  = (((double)(data.temp)) / 340) + 36.53;
+    result->temp  = (((float)(data.temp)) / 340) + 36.53;
 
     // in dps, degrees per second => sensitivity = +/-250
-    result->gyro.xi = ((((double)(data.gyrox)) * 250.0) / 32768.0) - offsets.gyro.xi;
-    result->gyro.yj = ((((double)(data.gyroy)) * 250.0) / 32768.0) - offsets.gyro.yj;
-    result->gyro.zk = ((((double)(data.gyroz)) * 250.0) / 32768.0) - offsets.gyro.zk;
+    result->gyro.xi = ((((float)(data.gyrox)) * 250.0) / 32768.0) - offsets.gyro.xi;
+    result->gyro.yj = ((((float)(data.gyroy)) * 250.0) / 32768.0) - offsets.gyro.yj;
+    result->gyro.zk = ((((float)(data.gyroz)) * 250.0) / 32768.0) - offsets.gyro.zk;
 
     return 1;
 }
 
 // the result gets stored in the raw quaternion change
-void get_raw_quaternion_change_from_gyroscope(quat_raw* change, quaternion* previous_quaternion, vector* gyroscope, double time_in_seconds_since_last_reading)
+void get_raw_quaternion_change_from_gyroscope(quat_raw* change, quaternion* previous_quaternion, vector* gyroscope, float time_in_seconds_since_last_reading)
 {
     // vectr is now the unit vector in the direction of rotation wrt to local current axis
     unit_vector(&(change->vectr), gyroscope);

@@ -140,11 +140,11 @@ void scale_and_compensate_Barodata(Barodatascaled* result)
     int64_t P = ((( ((int64_t)(data.D1)) * SENS )/(((int64_t)1) << 21)) - OFF ) / ( ((int64_t)1) << 15 );
 
     // in degree celcius
-    result->temperature = ((double)TEMP)/100;
+    result->temperature = ((float)TEMP)/100;
 
     // in mbar
-    result->abspressure = ((double)P)/100;
+    result->abspressure = ((float)P)/100;
 
     // in meters above sea level
-    result->altitude = ((pow( 10.0, log10(result->abspressure / 1013.25) / 5.2558797 ) - 1) * 1000000 * 0.3048)/(-6.8755856);
+    result->altitude = ((powf( 10.0, log10f(result->abspressure / 1013.25) / 5.2558797 ) - 1) * 1000000 * 0.3048)/(-6.8755856);
 }

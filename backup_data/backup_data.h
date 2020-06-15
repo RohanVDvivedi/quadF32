@@ -9,11 +9,11 @@
 
 void backup_data_init();
 
-int compareBackupDoubleValues(double a, double b);
+int compareBackupfloatValues(float a, float b);
 
 // returns 1,if write succeeded
-int write_backup_data(uint8_t index, double data);
+int write_backup_data(uint8_t index, float data);
 
-double read_backup_data(uint8_t index);
+float read_backup_data(uint8_t index);
 
 #endif

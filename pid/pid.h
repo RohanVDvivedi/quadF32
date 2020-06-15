@@ -6,28 +6,28 @@
 typedef struct pid_const pid_const;
 struct pid_const
 {
-	double Kp;
-	double Ki;
-	double Kd;
-	double range;
+	float Kp;
+	float Ki;
+	float Kd;
+	float range;
 };
 
 typedef struct pid_state pid_state;
 struct pid_state
 {
 	pid_const constants;
-	double previous_value;
-	double accumulated_error;
+	float previous_value;
+	float accumulated_error;
 };
 
-void pid_init(pid_state* pid, double Kp, double Ki, double Kd, double range);
+void pid_init(pid_state* pid, float Kp, float Ki, float Kd, float range);
 
 void pid_reinit(pid_state* pid);
 
 // updates pid constants
-void pid_update_constants(pid_state* pid, double Kp, double Ki, double Kd);
+void pid_update_constants(pid_state* pid, float Kp, float Ki, float Kd);
 
 // it is your responsibility to call pid_update at a regular interval in your program
-double pid_update(pid_state* pid, double current_value, double set_point);
+float pid_update(pid_state* pid, float current_value, float set_point);
 
 #endif

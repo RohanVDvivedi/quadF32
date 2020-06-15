@@ -16,7 +16,7 @@ void diff(vector* C, vector* A, vector* B)
 	C->zk = A->zk - B->zk;
 }
 
-void multiply_scalar(vector* C, vector* A, double sc)
+void multiply_scalar(vector* C, vector* A, float sc)
 {
 	C->xi = A->xi * sc;
 	C->yj = A->yj * sc;
@@ -30,14 +30,14 @@ void cross(vector* C, vector* A, vector* B)
 	C->zk = (A->xi * B->yj) - (A->yj * B->xi);
 }
 
-double dot(vector* A, vector* B)
+float dot(vector* A, vector* B)
 {
 	return (A->xi * B->xi) + (A->yj * B->yj) + (A->zk * B->zk);
 }
 
-double angle_between_vectors(vector* A, vector* B)
+float angle_between_vectors(vector* A, vector* B)
 {
-	double cosine = dot(A, B)/(magnitude_vector(A)*magnitude_vector(B));
+	float cosine = dot(A, B)/(magnitude_vector(A)*magnitude_vector(B));
 	if(cosine >= 1.0)
 	{
 		return 0;
@@ -55,7 +55,7 @@ double angle_between_vectors(vector* A, vector* B)
 int unit_vector(vector* unitResult, vector* A)
 {
 	int failed_finding_unit_vector = 0;
-	double magnit = magnitude_vector(A);
+	float magnit = magnitude_vector(A);
 	if(magnit == 0.0)
 	{
 		// small error hurts no man
@@ -73,7 +73,7 @@ void parallel_component(vector* C, vector* A, vector* B)
 	unit_vector(C, B);
 
 	// this is the magnitude of the component of A in direction of B
-	double parallel_component_magnitude = dot(A, B) / magnitude_vector(B);
+	float parallel_component_magnitude = dot(A, B) / magnitude_vector(B);
 
 	// multiply magnitude and the direction
 	multiply_scalar(C, C, parallel_component_magnitude);
@@ -89,13 +89,13 @@ void perpendicular_component(vector* C, vector* A, vector* B)
 	diff(C, A, C);
 }
 
-double magnitude_vector(vector* A)
+float magnitude_vector(vector* A)
 {
 	vector temp = *A;
 	return sqrt(dot(A, &temp));
 }
 
-double norm(quaternion* A)
+float norm(quaternion* A)
 {
 	return sqrt((A->sc * A->sc) + (A->xi * A->xi) + (A->yj * A->yj) + (A->zk * A->zk));
 }
@@ -110,9 +110,9 @@ void hamilton_product(quaternion* C, quaternion* A, quaternion* B)
 
 void to_quaternion(quaternion* destination, quat_raw* source)
 {
-	double theta_in_radians = (source->theta) * M_PI / 180.0;
-	double sine   = sin(theta_in_radians / 2);
-	double cosine = cos(theta_in_radians / 2);
+	float theta_in_radians = (source->theta) * M_PI / 180.0;
+	float sine   = sin(theta_in_radians / 2);
+	float cosine = cos(theta_in_radians / 2);
 	destination->sc = cosine;
 	destination->xi = sine * source->vectr.xi;
 	destination->yj = sine * source->vectr.yj;
@@ -141,8 +141,8 @@ void reciprocal(quaternion* destination, quaternion* source)
 	conjugate(destination, source);
 
 	// divide by the square of norm
-	double norm_1 	= norm(source);
-	double norm_2 	= norm_1 * norm_1;
+	float norm_1 	= norm(source);
+	float norm_2 	= norm_1 * norm_1;
 
 	destination->sc = destination->sc / norm_2;
 	destination->xi = destination->xi / norm_2;
@@ -152,7 +152,7 @@ void reciprocal(quaternion* destination, quaternion* source)
 
 // F is the final vector we get by rotating I by a quaternion R
 // F = R * I * Rconj
-double rotate_vector(vector* F, quaternion* R, vector* I)
+float rotate_vector(vector* F, quaternion* R, vector* I)
 {
 	quaternion Rinverse;
 	reciprocal(&Rinverse, R);
@@ -177,14 +177,14 @@ double rotate_vector(vector* F, quaternion* R, vector* I)
 	return Ftemp.sc;
 }
 
-void update_vector(vector* result, vector* new_value, double factor)
+void update_vector(vector* result, vector* new_value, float factor)
 {
 	result->xi = result->xi * (1 - factor) + new_value->xi * factor;
 	result->yj = result->yj * (1 - factor) + new_value->yj * factor;
 	result->zk = result->zk * (1 - factor) + new_value->zk * factor;
 }
 
-void slerp_quaternion(quaternion* Result, quaternion* A, double factorA, quaternion* B)
+void slerp_quaternion(quaternion* Result, quaternion* A, float factorA, quaternion* B)
 {
 	if(factorA == 0.0)
 	{
@@ -197,7 +197,7 @@ void slerp_quaternion(quaternion* Result, quaternion* A, double factorA, quatern
 		return;
 	}
 
-	double dot = (A->sc * B->sc + A->xi * B->xi + A->yj * B->yj + A->zk * B->zk);
+	float dot = (A->sc * B->sc + A->xi * B->xi + A->yj * B->yj + A->zk * B->zk);
 	dot = dot / ((A->sc * A->sc + A->xi * A->xi + A->yj * A->yj + A->zk * A->zk) * (B->sc * B->sc + B->xi * B->xi + B->yj * B->yj + B->zk * B->zk));
 	
 	quaternion B_ = (*B);
@@ -222,7 +222,7 @@ void slerp_quaternion(quaternion* Result, quaternion* A, double factorA, quatern
 		dot = -dot;
 	}
 
-	double thet;
+	float thet;
 	if(dot >= 1)
 	{
 		thet = 0;
@@ -232,9 +232,9 @@ void slerp_quaternion(quaternion* Result, quaternion* A, double factorA, quatern
 		thet = acos(dot);
 	}
 
-	double sinet = sin(thet * factorA);
-	double sinet_1 = sin(thet * (1 - factorA));
-	double sine = sin(thet);
+	float sinet = sin(thet * factorA);
+	float sinet_1 = sin(thet * (1 - factorA));
+	float sine = sin(thet);
 
 	if(sine <= 0.005)
 	{
@@ -242,7 +242,7 @@ void slerp_quaternion(quaternion* Result, quaternion* A, double factorA, quatern
 		Result->xi = (A_.xi * factorA + B_.xi * (1 - factorA));
 		Result->yj = (A_.yj * factorA + B_.yj * (1 - factorA));
 		Result->zk = (A_.zk * factorA + B_.zk * (1 - factorA));
-		double norm = (Result->sc * Result->sc + Result->xi * Result->xi + Result->yj * Result->yj + Result->zk * Result->zk);
+		float norm = (Result->sc * Result->sc + Result->xi * Result->xi + Result->yj * Result->yj + Result->zk * Result->zk);
 		Result->sc = Result->sc/norm;
 		Result->xi = Result->xi/norm;
 		Result->yj = Result->yj/norm;
@@ -264,8 +264,8 @@ void get_quaternion_from_vectors_changes(quaternion* quat, vector* Af, vector* A
 	vector A;diff(&A, Af, Ai);
 	vector B;diff(&B, Bf, Bi);
 
-	double perUnitMagDiffA = magnitude_vector(&A)/magnitude_vector(Ai);
-	double perUnitMagDiffB = magnitude_vector(&B)/magnitude_vector(Bi);
+	float perUnitMagDiffA = magnitude_vector(&A)/magnitude_vector(Ai);
+	float perUnitMagDiffB = magnitude_vector(&B)/magnitude_vector(Bi);
 
 	// this is the raw quaternion change from the sensors
 	quat_raw raw;
@@ -295,19 +295,19 @@ void get_quaternion_from_vectors_changes(quaternion* quat, vector* Af, vector* A
 	// else we would have to fuse to figure out the axis of rotation
 	else
 	{
-		double ybyz = 0.0;
+		float ybyz = 0.0;
 		if( ( (A.zk * B.xi) - (A.xi * B.zk) ) != 0.0 )
 		{
 			ybyz = - ( ( (A.zk * B.xi) - (A.xi * B.zk) ) / ( (A.yj * B.xi) - (A.xi * B.yj) ) );
 		}
 
-		double xbyy = 0.0;
+		float xbyy = 0.0;
 		if( ( (A.yj * B.zk) - (A.zk * B.yj) ) != 0.0 )
 		{
 			xbyy = - ( ( (A.yj * B.zk) - (A.zk * B.yj) ) / ( (A.xi * B.zk) - (A.zk * B.xi) ) );
 		}
 
-		double xbyz = 0.0;
+		float xbyz = 0.0;
 		if( ( (A.zk * B.yj) - (A.yj * B.zk) ) != 0.0 )
 		{
 			xbyz = - ( ( (A.zk * B.yj) - (A.yj * B.zk) ) / ( (A.xi * B.yj) - (A.yj * B.xi) ) );
@@ -351,21 +351,21 @@ void get_quaternion_from_vectors_changes(quaternion* quat, vector* Af, vector* A
 		// this is the vecotor in same or opposite direction of raw.vectr
 		vector AipCrossAfp;
 		cross(&AipCrossAfp, &Aip, &Afp);
-		double angle_AipCrossAfp_raw = angle_between_vectors(&AipCrossAfp, &(raw.vectr));
-		double raw_vectr_sign_inversion_required_a = angle_AipCrossAfp_raw > 170 ? -1 : 1;
+		float angle_AipCrossAfp_raw = angle_between_vectors(&AipCrossAfp, &(raw.vectr));
+		float raw_vectr_sign_inversion_required_a = angle_AipCrossAfp_raw > 170 ? -1 : 1;
 
 		// this is the vecotor in same or opposite direction of raw.vectr
 		vector BipCrossBfp;
 		cross(&BipCrossBfp, &Bip, &Bfp);
-		double angle_BipCrossBfp_raw = angle_between_vectors(&BipCrossBfp, &(raw.vectr));
-		double raw_vectr_sign_inversion_required_b = angle_BipCrossBfp_raw > 170 ? -1 : 1;
+		float angle_BipCrossBfp_raw = angle_between_vectors(&BipCrossBfp, &(raw.vectr));
+		float raw_vectr_sign_inversion_required_b = angle_BipCrossBfp_raw > 170 ? -1 : 1;
 
 		// find per unit change perpendicular change difference
 		// higher this value higher is the accuracy of the result angle from that vector sensor
 		vector Aperp_mag_diff; diff(&Aperp_mag_diff, &Afp, &Aip);
 		vector Bperp_mag_diff; diff(&Bperp_mag_diff, &Bfp, &Bip);
-		double factorA = magnitude_vector(&Aperp_mag_diff)/magnitude_vector(Ai);
-		double factorB = magnitude_vector(&Bperp_mag_diff)/magnitude_vector(Bi);
+		float factorA = magnitude_vector(&Aperp_mag_diff)/magnitude_vector(Ai);
+		float factorB = magnitude_vector(&Bperp_mag_diff)/magnitude_vector(Bi);
 
 		// use the factors
 		if(factorA > factorB)
@@ -383,8 +383,8 @@ void get_quaternion_from_vectors_changes(quaternion* quat, vector* Af, vector* A
 		factorA = factorA / (factorA + factorB);
 		factorB = 1 - factorA;
 
-		double angle_by_A = angle_between_vectors(&Afp, &Aip);
-		double angle_by_B = angle_between_vectors(&Bfp, &Bip);
+		float angle_by_A = angle_between_vectors(&Afp, &Aip);
+		float angle_by_B = angle_between_vectors(&Bfp, &Bip);
 
 		raw.theta = factorA * angle_by_A + factorB * angle_by_B;
 	}

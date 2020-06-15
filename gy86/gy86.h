@@ -14,7 +14,7 @@ typedef struct MPUdatascaled MPUdatascaled;
 struct MPUdatascaled
 {
     vector accl;
-    double temp;
+    float temp;
     vector gyro;
 };
 
@@ -27,9 +27,9 @@ struct HMCdatascaled
 typedef struct Barodatascaled Barodatascaled;
 struct Barodatascaled
 {
-    double temperature;
-    double abspressure;
-    double altitude;
+    float temperature;
+    float abspressure;
+    float altitude;
 };
 
 typedef enum MS5611state MS5611state;
@@ -46,7 +46,7 @@ enum MS5611state
 const MPUdatascaled* mpu_init();
 int get_scaled_MPUdata(MPUdatascaled* result);
 
-void get_raw_quaternion_change_from_gyroscope(quat_raw* change, quaternion* previous_quaternion, vector* gyroscope, double time_in_seconds_since_last_reading);
+void get_raw_quaternion_change_from_gyroscope(quat_raw* change, quaternion* previous_quaternion, vector* gyroscope, float time_in_seconds_since_last_reading);
 void fuse_raw_quaternion_change_with_accelerometer(quat_raw* change, quaternion* previous_quaternion, vector* accelerometer);
 
 // magnetometer data, returns initial offset values averages over 500 cycles

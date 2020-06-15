@@ -207,7 +207,7 @@ int numify_integer(char* num)
 	return result;
 }
 
-char* stringify_double(char* num, double f)
+char* stringify_float(char* num, float f)
 {
 	if(f != f)
 	{
@@ -223,7 +223,7 @@ char* stringify_double(char* num, double f)
 	}
 
 	int whole = ((int)(f));
-	double fraction = f - ((double)(whole));
+	float fraction = f - ((float)(whole));
 	int fraction_wh = ((int)(fraction * 1000000));
 
 	num = stringify_integer(num, whole);

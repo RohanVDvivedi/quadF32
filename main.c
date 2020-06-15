@@ -15,7 +15,7 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-#define map(val, a_min, a_max, b_min, b_max)	b_min + ((((double)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
+#define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
 #define max2(a, b)			((a > b) ? a : b)
@@ -107,12 +107,12 @@ void main(void)
 	uint64_t print_iter = 0;
 	char print_str[256];
 
-	double abs_roll = 0;
-	double abs_pitch = 0;
+	float abs_roll = 0;
+	float abs_pitch = 0;
 
 	while(1)
 	{
-		double time_delta_in_seconds = ((double)(get_now_micros() - begin_micros))/1000000.0;
+		float time_delta_in_seconds = ((float)(get_now_micros() - begin_micros))/1000000.0;
 		begin_micros = get_now_micros();
 
 		GPIOC->GPIO_ODR ^= (1 << 13);
@@ -121,21 +121,21 @@ void main(void)
 		get_scaled_MPUdata(&mpuData);
 
 		abs_roll  = (abs_roll  + mpuData.gyro.xi * time_delta_in_seconds) * (GYRO_ACCL_MIX)
-		+ ((atan(mpuData.accl.yj/mpuData.accl.zk) - atan( mpuInit->accl.yj/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
+		+ ((atanf(mpuData.accl.yj/mpuData.accl.zk) - atanf( mpuInit->accl.yj/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
 		abs_pitch = (abs_pitch + mpuData.gyro.yj * time_delta_in_seconds) * (GYRO_ACCL_MIX)
-		+ ((atan(-mpuData.accl.xi/mpuData.accl.zk) - atan(-mpuInit->accl.xi/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
+		+ ((atanf(-mpuData.accl.xi/mpuData.accl.zk) - atanf(-mpuInit->accl.xi/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
 
 		uint32_t chan_ret[6];
 		int is_rc_active = get_rc_channels(chan_ret);
 
-		double throttle = chan_ret[3];
-		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
-		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
-		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
+		float throttle = chan_ret[3];
+		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
+		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
+		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 30.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 30.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
-		double aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
+		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
 
 		#if defined PID_TO_TUNE_VAR
 			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
@@ -145,9 +145,9 @@ void main(void)
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
-		double x_motor_corr = 0;
-		double y_motor_corr = 0;
-		double z_motor_corr = 0;
+		float x_motor_corr = 0;
+		float y_motor_corr = 0;
+		float z_motor_corr = 0;
 
 		if(throttle < 100)
 		{
@@ -162,17 +162,17 @@ void main(void)
 			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
 		}
 
-		double motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
-		double motor_RF = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
-		double motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
-		double motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
+		float motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
+		float motor_RF = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
+		float motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
+		float motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
 
-		double min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
-		double max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);
+		float min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
+		float max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);
 
 		if(min_val < 0.0)
 		{
-			double diff = 0.0 - min_val;
+			float diff = 0.0 - min_val;
 			motor_LF += diff;
 			motor_RF += diff;
 			motor_LB += diff;
@@ -181,7 +181,7 @@ void main(void)
 
 		if(max_val > 1000.0)
 		{
-			double diff = max_val - 1000.0;
+			float diff = max_val - 1000.0;
 			motor_LF -= diff;
 			motor_RF -= diff;
 			motor_LB -= diff;
@@ -202,9 +202,9 @@ void main(void)
 				end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_double(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_double(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_double(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				*end_ps = '\n'; end_ps++;
 				uart_write_through_dma(print_str, end_ps - print_str);

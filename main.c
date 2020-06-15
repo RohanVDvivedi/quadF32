@@ -23,11 +23,12 @@
 #define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
 #define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
 
-#define GYRO_ACCL_MIX 0.98
+#define GYRO_ACCL_MIX     0.98
+#define LOOP_EVERY_MICROS 2500
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-//#define DEBUG_OVER_UART
+#define DEBUG_OVER_UART
 //#define PID_TO_TUNE_VAR /*y_rate_pid*/ /*x_rate_pid*/ /*z_rate_pid*/
 
 void main(void)
@@ -102,7 +103,7 @@ void main(void)
 	pid_init(&z_rate_pid, 10, 0, 0, 300);
 	*/
 
-	uint64_t begin_micros;
+	uint64_t begin_micros = get_now_micros() - LOOP_EVERY_MICROS;
 
 	uint64_t print_iter = 0;
 	char print_str[256];
@@ -206,6 +207,8 @@ void main(void)
 				end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_float(end_ps, time_delta_in_seconds); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				*end_ps = '\n'; end_ps++;
@@ -217,6 +220,6 @@ void main(void)
 			print_iter++;
 		}
 
-		delay_until_us(begin_micros + 2500);
+		delay_until_us(begin_micros + LOOP_EXERY_MICROS);
 	}
 }

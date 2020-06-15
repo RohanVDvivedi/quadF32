@@ -27,7 +27,7 @@
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-//#define DEBUG_OVER_UART
+#define DEBUG_OVER_UART
 //#define PID_TO_TUNE_VAR /*y_rate_pid*/ /*x_rate_pid*/ /*z_rate_pid*/
 
 void main(void)

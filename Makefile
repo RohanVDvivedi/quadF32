@@ -8,7 +8,7 @@ CFLAGS:=$(ARCH_FLAGS) $(STARTUP_DEFS) -Os -flto -ffunction-sections -fdata-secti
 USE_NOHOST:=--specs=nosys.specs
 GC:=-Wl,--gc-sections
 MAP:=-Wl,-Map=main.map
-LDSCRIPTS:=-L. -T gcc.ld
+LDSCRIPTS:=-L. -T gcc.ld -lm
 LFLAGS:=$(USE_NOHOST) $(LDSCRIPTS) $(GC) $(MAP)
 
 SRCS:=./main.c ./*/*.c

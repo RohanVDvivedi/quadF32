@@ -27,7 +27,7 @@
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-#define DEBUG_OVER_UART
+//#define DEBUG_OVER_UART
 //#define PID_TO_TUNE_VAR /*y_rate_pid*/ /*x_rate_pid*/ /*z_rate_pid*/
 
 void main(void)
@@ -80,8 +80,8 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 0, 0, 0, 300);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 7.0, 0.0, 0, 300);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 7.0, 0.0, 0, 300);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
 	// flyable values
 	/*
@@ -145,6 +145,10 @@ void main(void)
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
+		float x_rate_req = 3 * (x_rc_req -  abs_roll);
+		float y_rate_req = 3 * (y_rc_req - abs_pitch);
+		float z_rate_req = z_rc_req;
+
 		float x_motor_corr = 0;
 		float y_motor_corr = 0;
 		float z_motor_corr = 0;
@@ -157,9 +161,9 @@ void main(void)
 		}
 		else
 		{
-			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rc_req);
-			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rc_req);
-			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rc_req);
+			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rate_req);
+			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rate_req);
+			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rate_req);
 		}
 
 		float motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
@@ -202,8 +206,8 @@ void main(void)
 				end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, x_rate_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, y_rate_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				*end_ps = '\n'; end_ps++;

@@ -28,8 +28,8 @@
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-#define DEBUG_OVER_UART
-//#define PID_TO_TUNE_VAR /*y_rate_pid*/ /*x_rate_pid*/ /*z_rate_pid*/
+//#define DEBUG_OVER_UART
+#define PID_TO_TUNE_VAR y_rate_pid /*x_rate_pid*/ /*z_rate_pid*/
 
 void main(void)
 {
@@ -81,8 +81,8 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 7.0, 0.0, 0, 300);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 7.0, 0.0, 0, 300);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 0, 0, 0, 300);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
 	// flyable values
 	/*
@@ -134,7 +134,7 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 30.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 10.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
 

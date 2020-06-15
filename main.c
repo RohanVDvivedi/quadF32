@@ -119,7 +119,7 @@ void main(void)
 
 		double throttle = chan_ret[3];
 		double x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
-		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -50.0, 50.0);
+		double y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		double z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
 		double aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 30.0);

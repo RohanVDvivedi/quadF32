@@ -220,6 +220,6 @@ void main(void)
 			print_iter++;
 		}
 
-		delay_until_us(begin_micros + LOOP_EXERY_MICROS);
+		delay_until_us(begin_micros + LOOP_EVERY_MICROS);
 	}
 }

@@ -29,7 +29,7 @@
 //#define CALIBRATE_ESC_ON_START_UP
 
 //#define DEBUG_OVER_UART
-#define PID_TO_TUNE_VAR y_rate_pid /*x_rate_pid*/ /*z_rate_pid*/
+#define PID_TO_TUNE_VAR /*y_rate_pid*/ x_rate_pid /*z_rate_pid*/
 
 void main(void)
 {
@@ -207,8 +207,8 @@ void main(void)
 				end_ps = stringify_integer(end_ps, motor_RF); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				end_ps = stringify_float(end_ps, time_delta_in_seconds); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				*end_ps = '\n'; end_ps++;

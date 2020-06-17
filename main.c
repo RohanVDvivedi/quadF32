@@ -29,7 +29,7 @@
 //#define CALIBRATE_ESC_ON_START_UP
 
 //#define DEBUG_OVER_UART
-#define PID_TO_TUNE_VAR /*y_rate_pid*/ x_rate_pid /*z_rate_pid*/
+//#define PID_TO_TUNE_VAR /*y_rate_pid*/ x_rate_pid /*z_rate_pid*/
 
 void main(void)
 {
@@ -81,13 +81,13 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 0, 0, 0, 300);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 0, 0, 0, 300);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.3, 0.0005, 0, 300);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.3, 0.0005, 0, 300);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
 	// flyable values
 	/*
-	pid_init(&x_rate_pid, 10, 0, 0, 300);
-	pid_init(&y_rate_pid, 10, 0, 0, 300);
+	pid_init(&x_rate_pid, 2.3, 0.0005, 0, 300);
+	pid_init(&y_rate_pid, 2.3, 0.0005, 0, 300);
 	pid_init(&z_rate_pid, 10, 0, 0, 300);
 	*/
 	// test bench empirical values
@@ -134,7 +134,7 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 10.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 5.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
 
@@ -146,15 +146,15 @@ void main(void)
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
-		float x_rate_req = 3 * (x_rc_req -  abs_roll);
-		float y_rate_req = 3 * (y_rc_req - abs_pitch);
+		float x_rate_req = (x_rc_req -  abs_roll);
+		float y_rate_req = (y_rc_req - abs_pitch);
 		float z_rate_req = z_rc_req;
 
 		float x_motor_corr = 0;
 		float y_motor_corr = 0;
 		float z_motor_corr = 0;
 
-		if(throttle < 100)
+		if(throttle < 60)
 		{
 			pid_reinit(&x_rate_pid);
 			pid_reinit(&y_rate_pid);

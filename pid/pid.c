@@ -28,9 +28,7 @@ float pid_update(pid_state* pid, float current_value, float set_point)
 	// this condition is when the pid_update is forst called
 	// we set it to current value so that the derivative component is 0
 	if(isnan(pid->previous_value))
-	{
 		pid->previous_value = current_value;
-	}
 
 	// calculate error
 	float error = set_point - current_value;
@@ -52,13 +50,9 @@ float pid_update(pid_state* pid, float current_value, float set_point)
 
 	// bound result if it is out of bounds
 	if(result > pid->constants.range)
-	{
 		result = pid->constants.range;
-	}
 	else if(result < -pid->constants.range)
-	{
 		result = -pid->constants.range;
-	}
 
 	return result;
 }

@@ -81,9 +81,9 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 3.5, 0, 0, 300);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 3.5, 0, 0, 300);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 300);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 3.5, 0, 0, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 3.5, 0, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 400);
 	// flyable values
 	/*
 	pid_init(&x_rate_pid, 3.5, 0.005, 0, 300);

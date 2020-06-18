@@ -14,7 +14,7 @@ struct MPUdata
 
 // gyroscope steady state initial values may not be 0
 // while initial accelerometer values will help us get final rotation
-static MPUdatascaled offsets = {.accl = {.xi = 0.154, .yj = -0.005, .zk = -0.729}, .temp = 0.0, .gyro = {.xi = -2.16, .yj = 1.6, .zk = 0.21}};
+static MPUdatascaled offsets = {.accl = {.xi = 0.154, .yj = -0.005, .zk = -0.729}, .temp = 0.0, .gyro = {.xi = -2.45, .yj = 1.17, .zk = 0.12}};
 
 // gyroscope steady state initial values may not be 0
 // while initial accelerometer values will help us get final rotation

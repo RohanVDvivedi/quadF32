@@ -39,6 +39,17 @@ float pid_update(pid_state* pid, float current_value, float set_point)
 	// integral component
 	pid->accumulated_error += error;
 	float integral = pid->constants.Ki * pid->accumulated_error;
+	int check = 1;
+	
+	if(integral > pid->constants.range)
+		integral =  pid->constants.range;
+	else if(integral < -pid->constants.range)
+		integral = -pid->constants.range;
+	else
+		check = 0;
+
+	if(check)
+		pid->accumulated_error = integral/pid->constants.Ki;
 
 	// do not consider setpoint in error derivative, since this can create un wanted spikes
 	// so we calculate the previous error only using the current setpoint, effectively nullyfying the effect of the setpoint

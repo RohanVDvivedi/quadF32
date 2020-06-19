@@ -18,18 +18,13 @@
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
-#define max2(a, b)			((a > b) ? a : b)
-#define min2(a, b)			((a < b) ? a : b)
-#define max4(a, b, c, d)	max2(max2(a,b), max2(c,d))
-#define min4(a, b, c, d)	min2(min2(a,b), min2(c,d))
-
 #define GYRO_ACCL_MIX     0.98
 #define LOOP_EVERY_MICROS 2500
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-#define DEBUG_OVER_UART
-//#define PID_TO_TUNE_VAR y_rate_pid /*x_rate_pid*/ /*z_rate_pid*/
+//#define DEBUG_OVER_UART
+#define PID_TO_TUNE_VAR /*y_rate_pid*/ x_rate_pid /*z_rate_pid*/
 
 void main(void)
 {
@@ -139,14 +134,14 @@ void main(void)
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
 
 		#if defined PID_TO_TUNE_VAR
-			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
+			pid_update_constants(&PID_TO_TUNE_VAR, 3.5, aux2, 0.0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
-		float x_rate_req = x_rc_req -  abs_roll;
+		float x_rate_req = aux1 * (x_rc_req -  abs_roll);
 		float y_rate_req = y_rc_req - abs_pitch;
 		float z_rate_req = z_rc_req;
 
@@ -172,8 +167,8 @@ void main(void)
 		float motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
 		float motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
 
-		float min_val = min4(motor_LF, motor_RF, motor_LB, motor_RB);
-		float max_val = max4(motor_LF, motor_RF, motor_LB, motor_RB);
+		float min_val = fminf(fminf(motor_LF, motor_RF), fminf(motor_LB, motor_RB));
+		float max_val = fmaxf(fmaxf(motor_LF, motor_RF), fmaxf(motor_LB, motor_RB));
 
 		if(min_val < 0.0)
 		{

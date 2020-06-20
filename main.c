@@ -63,22 +63,19 @@ void main(void)
 
 	#if defined DEBUG_OVER_UART
 		if(i2c_detect(0x68))
-		{
 			uart_write_blocking("MPU detected\n", 13);
-		}
 		else
-		{
 			uart_write_blocking("MPU not detected\n", 17);
-		}
 	#endif
 
 	// initialize all necessary sensors
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 3.5, 0, 0, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 3.5, 0, 0, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.5, 0, 0, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.5, 0, 0, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 400);
+	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
 	pid_init(&x_rate_pid, 3.5, 0.005, 0, 300);
@@ -207,8 +204,8 @@ void main(void)
 				//end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuData.gyro.zk); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, mpuInit->gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;

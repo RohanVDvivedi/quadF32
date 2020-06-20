@@ -24,7 +24,7 @@
 //#define CALIBRATE_ESC_ON_START_UP
 
 //#define DEBUG_OVER_UART
-//#define PID_TO_TUNE_VAR /*y_rate_pid*/ x_rate_pid /*z_rate_pid*/
+//#define PID_TO_TUNE_VAR ///*y_rate_pid*/ x_rate_pid /*z_rate_pid*/
 
 void main(void)
 {
@@ -72,8 +72,8 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.7, 0, 0, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.7, 0, 0, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.5, 0.00075, 0.5, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.5, 0.00075, 0.5, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
@@ -126,20 +126,21 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 5.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 0.01);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
-		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.01);
+		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 5.0);
 
 		#if defined PID_TO_TUNE_VAR
-			pid_update_constants(&PID_TO_TUNE_VAR, aux1, aux2, 0.0);
+			pid_update_constants(&x_rate_pid, x_rate_pid.constants.Kp, aux1, aux2);
+			pid_update_constants(&y_rate_pid, y_rate_pid.constants.Kp, aux1, aux2);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
-		float x_rate_req = 1.6 * (x_rc_req -  abs_roll);
-		float y_rate_req = 1.6 * (y_rc_req - abs_pitch);
+		float x_rate_req = 1.8 * (x_rc_req -  abs_roll);
+		float y_rate_req = 1.8 * (y_rc_req - abs_pitch);
 		float z_rate_req = z_rc_req;
 
 		float x_motor_corr = 0;
@@ -201,11 +202,11 @@ void main(void)
 				//end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuData.gyro.zk); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, mpuInit->gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;

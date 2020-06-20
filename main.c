@@ -72,8 +72,8 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.5, 0.00075, 0.5, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.5, 0.00075, 0.5, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.7, 0.00075, 0.8, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.7, 0.00075, 0.8, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values

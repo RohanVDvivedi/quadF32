@@ -72,9 +72,9 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.6, 0.0004, 0.6, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.6, 0.0004, 0.6, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 1.6, 0.0004, 0.6, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.61, 0.00058, 0.63, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.61, 0.00058, 0.63, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 1.61, 0.00058, 0.63, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
@@ -145,8 +145,8 @@ void main(void)
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
-		float x_rate_req = 3 * (x_rc_req -  abs_roll);
-		float y_rate_req = 3 * (y_rc_req - abs_pitch);
+		float x_rate_req = 2.5 * (x_rc_req -  abs_roll);
+		float y_rate_req = 2.5 * (y_rc_req - abs_pitch);
 		float z_rate_req = z_rc_req;
 
 		float x_motor_corr = 0;

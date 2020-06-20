@@ -23,7 +23,7 @@
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-//#define DEBUG_OVER_UART
+#define DEBUG_OVER_UART
 #define PID_TO_TUNE
 
 void main(void)
@@ -78,8 +78,8 @@ void main(void)
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.8, 0.0005, 0.25, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.8, 0.0005, 0.25, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.3, 0.000625, 0, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.3, 0.000625, 0, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 1.8, 0.0005, 0.25, 400);
 	*/
 

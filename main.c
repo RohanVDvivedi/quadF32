@@ -72,8 +72,8 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.75, 0.0006, 0.65, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.75, 0.0006, 0.65, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.75, 0.0004, 0.65, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.75, 0.0004, 0.65, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
@@ -103,6 +103,8 @@ void main(void)
 	float abs_roll = 0;
 	float abs_pitch = 0;
 
+	MPUdatascaled mpuData = *mpuInit;
+
 	while(1)
 	{
 		float time_delta_in_seconds = ((float)(get_now_micros() - begin_micros))/1000000.0;
@@ -110,8 +112,12 @@ void main(void)
 
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
-		MPUdatascaled mpuData;
-		get_scaled_MPUdata(&mpuData);
+		MPUdatascaled mpuTemp;
+		get_scaled_MPUdata(&mpuTemp);
+		mpuData.accl = mpuTemp.accl;
+		multiply_scalar(&(mpuTemp.gyro), &(mpuTemp.gyro), 0.3);
+		multiply_scalar(&(mpuData.gyro), &(mpuData.gyro), 0.7);
+		sum(&(mpuData.gyro), &(mpuData.gyro), &(mpuTemp.gyro));
 
 		abs_roll  = (abs_roll  + mpuData.gyro.xi * time_delta_in_seconds) * (GYRO_ACCL_MIX)
 		+ ((atanf( mpuData.accl.yj/mpuData.accl.zk) - atanf( mpuInit->accl.yj/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
@@ -139,8 +145,8 @@ void main(void)
 		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
 		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
 
-		float x_rate_req = 1.8 * (x_rc_req -  abs_roll);
-		float y_rate_req = 1.8 * (y_rc_req - abs_pitch);
+		float x_rate_req = 2 * (x_rc_req -  abs_roll);
+		float y_rate_req = 2 * (y_rc_req - abs_pitch);
 		float z_rate_req = z_rc_req;
 
 		float x_motor_corr = 0;

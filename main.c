@@ -72,15 +72,15 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.3, 0.000625, 0, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.3, 0.000625, 0, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 0, 0, 0, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.5, 0.0003, 0, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.5, 0.0003, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 2.5, 0, 0, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 1.3, 0.000625, 0, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 1.3, 0.000625, 0, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 1.8, 0.0005, 0.25, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.5, 0.0003, 0, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.5, 0.0003, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 2.5, 0, 0, 400);
 	*/
 
 	uint64_t begin_micros = get_now_micros() - LOOP_EVERY_MICROS;
@@ -120,13 +120,14 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 3);
+		float aux1 = 2.3 + map(chan_ret[1], 0.0, 1000.0, 0.0, 3);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.005);
 
 		#if defined PID_TO_TUNE
-			pid_update_constants(&x_rate_pid, aux1, aux2, 0);
-			pid_update_constants(&y_rate_pid, aux1, aux2, 0);
+			pid_update_constants(&x_rate_pid, aux1, x_rate_pid.constants.Ki, 0);
+			pid_update_constants(&y_rate_pid, aux1, y_rate_pid.constants.Ki, 0);
+			//pid_update_constants(&z_rate_pid, aux1, aux2, 0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);

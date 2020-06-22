@@ -21,6 +21,9 @@
 #define GYRO_ACCL_MIX     0.98
 #define LOOP_EVERY_MICROS 2500
 
+#define THROTTLE_PID_ACTIVATE 100.0
+#define THROTTLE_MAX 1000.0
+
 //#define CALIBRATE_ESC_ON_START_UP
 
 //#define DEBUG_OVER_UART
@@ -120,14 +123,14 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 8.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 1.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.005);
 
 		#if defined PID_TO_TUNE
-			//pid_update_constants(&x_rate_pid, x_rate_pid.constants.Kp, x_rate_pid.constants.Ki, aux1);
-			//pid_update_constants(&y_rate_pid, x_rate_pid.constants.Kp, y_rate_pid.constants.Ki, aux1);
-			pid_update_constants(&z_rate_pid, aux1 + 2.5, 0, 0);
+			pid_update_constants(&x_rate_pid, 2.5 + aux1, x_rate_pid.constants.Ki, x_rate_pid.constants.Kd);
+			pid_update_constants(&y_rate_pid, 2.5 + aux1, y_rate_pid.constants.Ki, y_rate_pid.constants.Kd);
+			//pid_update_constants(&z_rate_pid, 7.0, 0, 0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
@@ -138,11 +141,9 @@ void main(void)
 		float y_rate_req = 2 * (y_rc_req - abs_pitch);
 		float z_rate_req = z_rc_req;
 
-		float x_motor_corr = 0;
-		float y_motor_corr = 0;
-		float z_motor_corr = 0;
+		float motor_LF = 0, motor_RF = 0, motor_LB = 0, motor_RB = 0;
 
-		if(throttle < 60)
+		if(throttle < THROTTLE_PID_ACTIVATE)
 		{
 			pid_reinit(&x_rate_pid);
 			pid_reinit(&y_rate_pid);
@@ -150,35 +151,35 @@ void main(void)
 		}
 		else
 		{
-			x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rate_req);
-			y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rate_req);
-			z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rate_req);
-		}
+			float x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rate_req);
+			float y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rate_req);
+			float z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rate_req);
 
-		float motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
-		float motor_RF = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
-		float motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
-		float motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
+			motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
+			motor_RF = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
+			motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
+			motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
 
-		float min_val = fminf(fminf(motor_LF, motor_RF), fminf(motor_LB, motor_RB));
-		float max_val = fmaxf(fmaxf(motor_LF, motor_RF), fmaxf(motor_LB, motor_RB));
+			if(motor_LF < THROTTLE_PID_ACTIVATE)
+				motor_LF = THROTTLE_PID_ACTIVATE;
+			if(motor_RF < THROTTLE_PID_ACTIVATE)
+				motor_RF = THROTTLE_PID_ACTIVATE;
+			if(motor_LB < THROTTLE_PID_ACTIVATE)
+				motor_LB = THROTTLE_PID_ACTIVATE;
+			if(motor_RB < THROTTLE_PID_ACTIVATE)
+				motor_RB = THROTTLE_PID_ACTIVATE;
+			
 
-		if(min_val < 0.0)
-		{
-			float diff = 0.0 - min_val;
-			motor_LF += diff;
-			motor_RF += diff;
-			motor_LB += diff;
-			motor_RB += diff;
-		}
+			float max_val = fmaxf(fmaxf(motor_LF, motor_RF), fmaxf(motor_LB, motor_RB));
 
-		if(max_val > 1000.0)
-		{
-			float diff = max_val - 1000.0;
-			motor_LF -= diff;
-			motor_RF -= diff;
-			motor_LB -= diff;
-			motor_RB -= diff;
+			if(max_val > THROTTLE_MAX)
+			{
+				float diff = max_val - THROTTLE_MAX;
+				motor_LF -= diff;
+				motor_RF -= diff;
+				motor_LB -= diff;
+				motor_RB -= diff;
+			}
 		}
 
 		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));

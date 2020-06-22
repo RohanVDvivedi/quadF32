@@ -182,7 +182,7 @@ void main(void)
 			}
 		}
 
-		set_motors(((uint32_t)motor_LF), ((uint32_t)motor_RF), ((uint32_t)motor_LB), ((uint32_t)motor_RB));
+		set_motors(motor_LF, motor_RF, motor_LB, motor_RB);
 
 		if(print_iter == 100)
 		{

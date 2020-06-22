@@ -74,13 +74,13 @@ void main(void)
 	// initialize pid variables
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.5, 0.0003, 0.000135, 400);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.5, 0.0003, 0.000135, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 2.5, 0, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 7.0, 0, 0, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.5, 0.0003, 0.000135, 400);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.5, 0.0003, 0.000135, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 2.5, 0, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 7.0, 0, 0, 400);
 	*/
 
 	uint64_t begin_micros = get_now_micros() - LOOP_EVERY_MICROS;
@@ -120,14 +120,14 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 2);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 8.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.005);
 
 		#if defined PID_TO_TUNE
-			pid_update_constants(&x_rate_pid, x_rate_pid.constants.Kp, x_rate_pid.constants.Ki, aux1);
-			pid_update_constants(&y_rate_pid, x_rate_pid.constants.Kp, y_rate_pid.constants.Ki, aux1);
-			//pid_update_constants(&z_rate_pid, aux1, aux2, 0);
+			//pid_update_constants(&x_rate_pid, x_rate_pid.constants.Kp, x_rate_pid.constants.Ki, aux1);
+			//pid_update_constants(&y_rate_pid, x_rate_pid.constants.Kp, y_rate_pid.constants.Ki, aux1);
+			pid_update_constants(&z_rate_pid, aux1 + 2.5, 0, 0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 3.0);

@@ -83,7 +83,7 @@ void main(void)
 	// initialize pid variables
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.017, 0.00004, 400);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.2, 0.034, 0.00008, 400);
 	// flyable values
 	/*
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.017, 0.00004, 400);

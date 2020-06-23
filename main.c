@@ -32,7 +32,7 @@
 
 //#define CALIBRATE_ESC_ON_START_UP
 
-#define DEBUG_OVER_UART
+//#define DEBUG_OVER_UART
 //#define PID_TO_TUNE
 
 void main(void)
@@ -83,7 +83,7 @@ void main(void)
 	// initialize pid variables
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.009, 0.00004, 400);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.009, 0.00004, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 7.0, 0, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
 	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
@@ -129,14 +129,14 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ANGLE_INPUT_LIMIT, ANGLE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 3.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 8.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
-		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.005);
+		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
 
 		#if defined PID_TO_TUNE
 			//pid_update_constants(&x_rate_pid, 2.5 + aux1, x_rate_pid.constants.Ki, x_rate_pid.constants.Kd);
 			//pid_update_constants(&y_rate_pid, 2.5 + aux1, y_rate_pid.constants.Ki, y_rate_pid.constants.Kd);
-			//pid_update_constants(&z_rate_pid, 7.0, 0, 0);
+			pid_update_constants(&z_rate_pid, 7.0 + aux1, aux2, 0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
@@ -147,7 +147,7 @@ void main(void)
 		float y_rate_req = 1.3 * (y_rc_req - abs_pitch);
 		float z_rate_req = z_rc_req;
 
-		float motor_LF = 0, motor_RF = 0, motor_LB = 0, motor_RB = 0;
+		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
 
 		if(throttle < THROTTLE_PID_ACTIVATE)
 		{
@@ -161,10 +161,10 @@ void main(void)
 			float y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rate_req);
 			float z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rate_req);
 
-			motor_LF = throttle + x_motor_corr - y_motor_corr - z_motor_corr;
-			motor_RF = throttle - x_motor_corr - y_motor_corr + z_motor_corr;
-			motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
-			motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
+			motor_LF += (0 + x_motor_corr - y_motor_corr - z_motor_corr);
+			motor_RF += (0 - x_motor_corr - y_motor_corr + z_motor_corr);
+			motor_LB += (0 + x_motor_corr + y_motor_corr + z_motor_corr);
+			motor_RB += (0 - x_motor_corr + y_motor_corr - z_motor_corr);
 
 			if(motor_LF < THROTTLE_PID_ACTIVATE)	motor_LF = THROTTLE_PID_ACTIVATE;
 			if(motor_RF < THROTTLE_PID_ACTIVATE)	motor_RF = THROTTLE_PID_ACTIVATE;

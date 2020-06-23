@@ -15,6 +15,8 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
+#define STABILIZE_MODE
+
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
@@ -81,9 +83,15 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.034, 0.00008, 400);
+	// outer pids provide input set point to inner pids controlling x and y axis to maintain a fixed attitude
+		pid_state x_ang_pid; pid_init(&x_ang_pid, 1.0, 0, 0, 90);
+		pid_state y_ang_pid; pid_init(&y_ang_pid, 1.0, 0, 0, 90);
+	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.034, 0.00008, 400);
+	// altitude rate pid will mainly work to make 0 rate of change of altitude
+		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
 	// flyable values
 	/*
 	pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
@@ -98,6 +106,7 @@ void main(void)
 
 	float abs_roll = 0;
 	float abs_pitch = 0;
+	float alt_rate = 0;
 
 	MPUdatascaled mpuData = *mpuInit;
 
@@ -132,19 +141,15 @@ void main(void)
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
 
+		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
+		y_rc_req = insensitivity_limit(y_rc_req, 0.1);
+		z_rc_req = insensitivity_limit(z_rc_req, 2.0);
+
 		#if defined PID_TO_TUNE
 			//pid_update_constants(&x_ang_rate_pid, 2.5 + aux1, x_ang_rate_pid.constants.Ki, x_ang_rate_pid.constants.Kd);
 			//pid_update_constants(&y_ang_rate_pid, 2.5 + aux1, y_ang_rate_pid.constants.Ki, y_ang_rate_pid.constants.Kd);
 			pid_update_constants(&z_ang_rate_pid, 7.0 + aux1, aux2, 0);
 		#endif
-
-		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
-		y_rc_req = insensitivity_limit(y_rc_req, 0.1);
-		z_rc_req = insensitivity_limit(z_rc_req, 2.0);
-
-		float x_rate_req = /*aux*/1 * (x_rc_req/* -  abs_roll*/);
-		float y_rate_req = /*aux*/1 * (y_rc_req/* - abs_pitch*/);
-		float z_rate_req = z_rc_req;
 
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
 
@@ -156,14 +161,27 @@ void main(void)
 		}
 		else
 		{
+			#if defined STABILIZE_MODE
+				float x_rate_req = pid_update(&x_ang_pid,  abs_roll, x_rc_req);
+				float y_rate_req = pid_update(&y_ang_pid, abs_pitch, y_rc_req);
+			#else
+				float x_rate_req = x_rc_req;
+				float y_rate_req = y_rc_req;
+			#endif
+
+			float z_rate_req = z_rc_req;
+
 			float x_motor_corr = pid_update(&x_ang_rate_pid, mpuData.gyro.xi, x_rate_req);
 			float y_motor_corr = pid_update(&y_ang_rate_pid, mpuData.gyro.yj, y_rate_req);
 			float z_motor_corr = pid_update(&z_ang_rate_pid, mpuData.gyro.zk, z_rate_req);
 
-			motor_LF += (0 + x_motor_corr - y_motor_corr - z_motor_corr);
-			motor_RF += (0 - x_motor_corr - y_motor_corr + z_motor_corr);
-			motor_LB += (0 + x_motor_corr + y_motor_corr + z_motor_corr);
-			motor_RB += (0 - x_motor_corr + y_motor_corr - z_motor_corr);
+			// we always strive to make 0 altitude rate
+			float comm_motor_corr = pid_update(&z_alt_rate_pid, 0, 0);
+
+			motor_LF += (comm_motor_corr + x_motor_corr - y_motor_corr - z_motor_corr);
+			motor_RF += (comm_motor_corr - x_motor_corr - y_motor_corr + z_motor_corr);
+			motor_LB += (comm_motor_corr + x_motor_corr + y_motor_corr + z_motor_corr);
+			motor_RB += (comm_motor_corr - x_motor_corr + y_motor_corr - z_motor_corr);
 
 			if(motor_LF < THROTTLE_PID_ACTIVATE)	motor_LF = THROTTLE_PID_ACTIVATE;
 			if(motor_RF < THROTTLE_PID_ACTIVATE)	motor_RF = THROTTLE_PID_ACTIVATE;

@@ -81,13 +81,13 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.02, 0.000055, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.02, 0.000055, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.017, 0.00004, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.017, 0.00004, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
 	// flyable values
 	/*
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.02, 0.000055, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.02, 0.000055, 400);
+	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.017, 0.00004, 400);
+	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.017, 0.00004, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
 	*/
 
@@ -128,7 +128,7 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ANGLE_INPUT_LIMIT, ANGLE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 8.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 3.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
 
@@ -142,8 +142,8 @@ void main(void)
 		y_rc_req = insensitivity_limit(y_rc_req, 0.1);
 		z_rc_req = insensitivity_limit(z_rc_req, 2.0);
 
-		float x_rate_req = 1.3 * (x_rc_req/* -  abs_roll*/);
-		float y_rate_req = 1.3 * (y_rc_req/* - abs_pitch*/);
+		float x_rate_req = /*aux*/1 * (x_rc_req/* -  abs_roll*/);
+		float y_rate_req = /*aux*/1 * (y_rc_req/* - abs_pitch*/);
 		float z_rate_req = z_rc_req;
 
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;

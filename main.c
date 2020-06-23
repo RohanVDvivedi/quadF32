@@ -84,12 +84,11 @@ void main(void)
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.009, 0.00004, 400);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.009, 0.00004, 400);
 	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
-	// as tested several times, Kp must not exceed 3.5 even value of 3 gives controller saturation
 	// flyable values
 	/*
 	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.009, 0.00004, 400);
 	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.009, 0.00004, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 7.0, 0, 0, 400);
+	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
 	*/
 
 	uint64_t begin_micros = get_now_micros() - LOOP_EVERY_MICROS;
@@ -179,11 +178,11 @@ void main(void)
 
 		set_motors(motor_LF, motor_RF, motor_LB, motor_RB);
 
-		if(print_iter == 100)
-		{
-			print_iter = 0;
+		#if defined DEBUG_OVER_UART
+			if(print_iter == 100)
+			{
+				print_iter = 0;
 
-			#if defined DEBUG_OVER_UART
 				char* end_ps = print_str;
 
 				//end_ps = stringify_integer(end_ps, is_rc_active); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -220,12 +219,10 @@ void main(void)
 
 				*end_ps = '\n'; end_ps++;
 				uart_write_through_dma(print_str, end_ps - print_str);
-			#endif
-		}
-		else
-		{
-			print_iter++;
-		}
+			}
+			else
+				print_iter++;
+		#endif
 
 		delay_until_us(begin_micros + LOOP_EVERY_MICROS);
 	}

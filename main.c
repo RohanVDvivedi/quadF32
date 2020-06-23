@@ -18,11 +18,17 @@
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
-#define GYRO_ACCL_MIX     0.98
-#define LOOP_EVERY_MICROS 2500
+#define GYRO_ACCL_MIX     			0.98
+#define LOOP_EVERY_MICROS 			2500
 
-#define THROTTLE_PID_ACTIVATE 100.0
-#define THROTTLE_MAX 1000.0
+#define THROTTLE_MIN_VALUE			  0.0
+#define THROTTLE_PID_ACTIVATE 		100.0
+#define THROTTLE_MAX_VALUE			800.0
+
+#define ANGLE_INPUT_LIMIT			15.0
+#define ANGULAR_RATE_INPUT_LIMIT	20.0
+
+#define MOTOR_MAX_PWM 				999.0
 
 //#define CALIBRATE_ESC_ON_START_UP
 
@@ -118,10 +124,10 @@ void main(void)
 		uint32_t chan_ret[6];
 		int is_rc_active = get_rc_channels(chan_ret);
 
-		float throttle = chan_ret[3];
-		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -15.0, 15.0);
-		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -15.0, 15.0);
-		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
+		float throttle = map(chan_ret[3], 0.0, 1000.0, THROTTLE_MIN_VALUE, THROTTLE_MAX_VALUE);
+		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -ANGLE_INPUT_LIMIT, ANGLE_INPUT_LIMIT);
+		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ANGLE_INPUT_LIMIT, ANGLE_INPUT_LIMIT);
+		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
 		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 1.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
@@ -160,26 +166,15 @@ void main(void)
 			motor_LB = throttle + x_motor_corr + y_motor_corr + z_motor_corr;
 			motor_RB = throttle - x_motor_corr + y_motor_corr - z_motor_corr;
 
-			if(motor_LF < THROTTLE_PID_ACTIVATE)
-				motor_LF = THROTTLE_PID_ACTIVATE;
-			if(motor_RF < THROTTLE_PID_ACTIVATE)
-				motor_RF = THROTTLE_PID_ACTIVATE;
-			if(motor_LB < THROTTLE_PID_ACTIVATE)
-				motor_LB = THROTTLE_PID_ACTIVATE;
-			if(motor_RB < THROTTLE_PID_ACTIVATE)
-				motor_RB = THROTTLE_PID_ACTIVATE;
-			
+			if(motor_LF < THROTTLE_PID_ACTIVATE)	motor_LF = THROTTLE_PID_ACTIVATE;
+			if(motor_RF < THROTTLE_PID_ACTIVATE)	motor_RF = THROTTLE_PID_ACTIVATE;
+			if(motor_LB < THROTTLE_PID_ACTIVATE)	motor_LB = THROTTLE_PID_ACTIVATE;
+			if(motor_RB < THROTTLE_PID_ACTIVATE)	motor_RB = THROTTLE_PID_ACTIVATE;
 
-			float max_val = fmaxf(fmaxf(motor_LF, motor_RF), fmaxf(motor_LB, motor_RB));
-
-			if(max_val > THROTTLE_MAX)
-			{
-				float diff = max_val - THROTTLE_MAX;
-				motor_LF -= diff;
-				motor_RF -= diff;
-				motor_LB -= diff;
-				motor_RB -= diff;
-			}
+			if(motor_LF > MOTOR_MAX_PWM)			motor_LF = MOTOR_MAX_PWM;
+			if(motor_RF > MOTOR_MAX_PWM)			motor_RF = MOTOR_MAX_PWM;
+			if(motor_LB > MOTOR_MAX_PWM)			motor_LB = MOTOR_MAX_PWM;
+			if(motor_RB > MOTOR_MAX_PWM)			motor_RB = MOTOR_MAX_PWM;
 		}
 
 		set_motors(motor_LF, motor_RF, motor_LB, motor_RB);

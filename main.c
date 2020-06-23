@@ -119,8 +119,8 @@ void main(void)
 		int is_rc_active = get_rc_channels(chan_ret);
 
 		float throttle = chan_ret[3];
-		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -20.0, 20.0);
-		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -20.0, 20.0);
+		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -15.0, 15.0);
+		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -15.0, 15.0);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, 20.0, -20.0);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
 		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 1.0);
@@ -133,9 +133,9 @@ void main(void)
 			//pid_update_constants(&z_rate_pid, 7.0, 0, 0);
 		#endif
 
-		x_rc_req = insensitivity_limit(x_rc_req, 3.0);
-		y_rc_req = insensitivity_limit(y_rc_req, 3.0);
-		z_rc_req = insensitivity_limit(z_rc_req, 3.0);
+		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
+		y_rc_req = insensitivity_limit(y_rc_req, 0.1);
+		z_rc_req = insensitivity_limit(z_rc_req, 2.0);
 
 		float x_rate_req = 2 * (x_rc_req -  abs_roll);
 		float y_rate_req = 2 * (y_rc_req - abs_pitch);

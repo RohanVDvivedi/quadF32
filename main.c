@@ -81,14 +81,14 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.2, 0.034, 0.00008, 400);
+	pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
+	pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
+	pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.034, 0.00008, 400);
 	// flyable values
 	/*
-	pid_state x_rate_pid; pid_init(&x_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state y_rate_pid; pid_init(&y_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state z_rate_pid; pid_init(&z_rate_pid, 5.0, 0.005, 0, 400);
+	pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
+	pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
+	pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.0, 0.005, 0, 400);
 	*/
 
 	uint64_t begin_micros = get_now_micros() - LOOP_EVERY_MICROS;
@@ -133,9 +133,9 @@ void main(void)
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
 
 		#if defined PID_TO_TUNE
-			//pid_update_constants(&x_rate_pid, 2.5 + aux1, x_rate_pid.constants.Ki, x_rate_pid.constants.Kd);
-			//pid_update_constants(&y_rate_pid, 2.5 + aux1, y_rate_pid.constants.Ki, y_rate_pid.constants.Kd);
-			pid_update_constants(&z_rate_pid, 7.0 + aux1, aux2, 0);
+			//pid_update_constants(&x_ang_rate_pid, 2.5 + aux1, x_ang_rate_pid.constants.Ki, x_ang_rate_pid.constants.Kd);
+			//pid_update_constants(&y_ang_rate_pid, 2.5 + aux1, y_ang_rate_pid.constants.Ki, y_ang_rate_pid.constants.Kd);
+			pid_update_constants(&z_ang_rate_pid, 7.0 + aux1, aux2, 0);
 		#endif
 
 		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
@@ -150,15 +150,15 @@ void main(void)
 
 		if(throttle < THROTTLE_PID_ACTIVATE)
 		{
-			pid_reinit(&x_rate_pid);
-			pid_reinit(&y_rate_pid);
-			pid_reinit(&z_rate_pid);
+			pid_reinit(&x_ang_rate_pid);
+			pid_reinit(&y_ang_rate_pid);
+			pid_reinit(&z_ang_rate_pid);
 		}
 		else
 		{
-			float x_motor_corr = pid_update(&x_rate_pid, mpuData.gyro.xi, x_rate_req);
-			float y_motor_corr = pid_update(&y_rate_pid, mpuData.gyro.yj, y_rate_req);
-			float z_motor_corr = pid_update(&z_rate_pid, mpuData.gyro.zk, z_rate_req);
+			float x_motor_corr = pid_update(&x_ang_rate_pid, mpuData.gyro.xi, x_rate_req);
+			float y_motor_corr = pid_update(&y_ang_rate_pid, mpuData.gyro.yj, y_rate_req);
+			float z_motor_corr = pid_update(&z_ang_rate_pid, mpuData.gyro.zk, z_rate_req);
 
 			motor_LF += (0 + x_motor_corr - y_motor_corr - z_motor_corr);
 			motor_RF += (0 - x_motor_corr - y_motor_corr + z_motor_corr);

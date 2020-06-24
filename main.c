@@ -15,7 +15,7 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-#define STABILIZE_MODE
+//#define STABILIZE_MODE
 
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
@@ -87,16 +87,16 @@ void main(void)
 		pid_state x_ang_pid; pid_init(&x_ang_pid, 1.0, 0, 0, 90);
 		pid_state y_ang_pid; pid_init(&y_ang_pid, 1.0, 0, 0, 90);
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
-		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.034, 0.00008, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.037, 0.000065, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
 	// flyable values
 	/*
-	pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.6, 0.017, 0.00004, 400);
-	pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.0, 0.005, 0, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.037, 0.000065, 400);
 	*/
 
 	uint64_t begin_micros = get_now_micros() - LOOP_EVERY_MICROS;

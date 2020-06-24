@@ -15,7 +15,7 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-#define STABILIZE_MODE
+//#define STABILIZE_MODE
 #define STABILIZATION_SENSITIVITY	0.3
 
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
@@ -25,13 +25,14 @@
 #define LOOP_EVERY_MICROS 			2500
 
 #define THROTTLE_MIN_VALUE			  0.0
-#define THROTTLE_PID_ACTIVATE 		100.0
+#define THROTTLE_PID_ACTIVATE 		200.0
 #define THROTTLE_MAX_VALUE			800.0
 
-#define ATTITUDE_INPUT_LIMIT		20.0
+#define ATTITUDE_INPUT_LIMIT		60.0
 #define ANGULAR_RATE_INPUT_LIMIT	20.0
 
-#define MOTOR_MAX_PWM 				999.0
+#define MOTOR_MIN_PWM 				110.0
+#define MOTOR_MAX_PWM 				990.0
 
 //#define CALIBRATE_ESC_ON_START_UP
 
@@ -182,15 +183,15 @@ void main(void)
 			motor_LB += (comm_motor_corr + x_motor_corr + y_motor_corr + z_motor_corr);
 			motor_RB += (comm_motor_corr - x_motor_corr + y_motor_corr - z_motor_corr);
 
-			if(motor_LF < THROTTLE_PID_ACTIVATE)	motor_LF = THROTTLE_PID_ACTIVATE;
-			if(motor_RF < THROTTLE_PID_ACTIVATE)	motor_RF = THROTTLE_PID_ACTIVATE;
-			if(motor_LB < THROTTLE_PID_ACTIVATE)	motor_LB = THROTTLE_PID_ACTIVATE;
-			if(motor_RB < THROTTLE_PID_ACTIVATE)	motor_RB = THROTTLE_PID_ACTIVATE;
+			if(motor_LF < MOTOR_MIN_PWM)	motor_LF = MOTOR_MIN_PWM;
+			if(motor_RF < MOTOR_MIN_PWM)	motor_RF = MOTOR_MIN_PWM;
+			if(motor_LB < MOTOR_MIN_PWM)	motor_LB = MOTOR_MIN_PWM;
+			if(motor_RB < MOTOR_MIN_PWM)	motor_RB = MOTOR_MIN_PWM;
 
-			if(motor_LF > MOTOR_MAX_PWM)			motor_LF = MOTOR_MAX_PWM;
-			if(motor_RF > MOTOR_MAX_PWM)			motor_RF = MOTOR_MAX_PWM;
-			if(motor_LB > MOTOR_MAX_PWM)			motor_LB = MOTOR_MAX_PWM;
-			if(motor_RB > MOTOR_MAX_PWM)			motor_RB = MOTOR_MAX_PWM;
+			if(motor_LF > MOTOR_MAX_PWM)	motor_LF = MOTOR_MAX_PWM;
+			if(motor_RF > MOTOR_MAX_PWM)	motor_RF = MOTOR_MAX_PWM;
+			if(motor_LB > MOTOR_MAX_PWM)	motor_LB = MOTOR_MAX_PWM;
+			if(motor_RB > MOTOR_MAX_PWM)	motor_RB = MOTOR_MAX_PWM;
 		}
 
 		set_motors(motor_LF, motor_RF, motor_LB, motor_RB);

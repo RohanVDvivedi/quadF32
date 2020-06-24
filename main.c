@@ -15,7 +15,7 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-//#define STABILIZE_MODE
+#define STABILIZE_MODE
 #define STABILIZATION_SENSITIVITY	0.3
 
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
@@ -141,7 +141,7 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ATTITUDE_INPUT_LIMIT, ATTITUDE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 6.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 3.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
 
@@ -215,8 +215,8 @@ void main(void)
 				//end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -237,8 +237,8 @@ void main(void)
 				//end_ps = stringify_float(end_ps, x_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, x_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;

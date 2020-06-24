@@ -15,6 +15,8 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
+#define STABILIZE_MODE
+
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
@@ -158,8 +160,8 @@ void main(void)
 		else
 		{
 			#if defined STABILIZE_MODE
-				float x_rate_req = (x_rc_req -  abs_roll);
-				float y_rate_req = (y_rc_req - abs_pitch);
+				float x_rate_req = (x_rc_req - 0.65 *  abs_roll);
+				float y_rate_req = (y_rc_req - 0.65 * abs_pitch);
 			#else
 				float x_rate_req = x_rc_req;
 				float y_rate_req = y_rc_req;

@@ -15,8 +15,6 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-//#define STABILIZE_MODE
-
 #define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
 #define insensitivity_limit(val, limit)			((val <= limit) && (val >= -limit)) ? 0 : val
 
@@ -27,7 +25,7 @@
 #define THROTTLE_PID_ACTIVATE 		100.0
 #define THROTTLE_MAX_VALUE			800.0
 
-#define ANGLE_INPUT_LIMIT			15.0
+#define ATTITUDE_INPUT_LIMIT		20.0
 #define ANGULAR_RATE_INPUT_LIMIT	20.0
 
 #define MOTOR_MAX_PWM 				999.0
@@ -83,9 +81,6 @@ void main(void)
 	const MPUdatascaled* mpuInit = mpu_init();
 
 	// initialize pid variables
-	// outer pids provide input set point to inner pids controlling x and y axis to maintain a fixed attitude
-		pid_state x_ang_pid; pid_init(&x_ang_pid, 1.0, 0, 0, 90);
-		pid_state y_ang_pid; pid_init(&y_ang_pid, 1.0, 0, 0, 90);
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
 		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
 		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
@@ -133,11 +128,11 @@ void main(void)
 		int is_rc_active = get_rc_channels(chan_ret);
 
 		float throttle = map(chan_ret[3], 0.0, 1000.0, THROTTLE_MIN_VALUE, THROTTLE_MAX_VALUE);
-		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -ANGLE_INPUT_LIMIT, ANGLE_INPUT_LIMIT);
-		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ANGLE_INPUT_LIMIT, ANGLE_INPUT_LIMIT);
+		float x_rc_req = map(chan_ret[5], 0.0, 1000.0, -ATTITUDE_INPUT_LIMIT, ATTITUDE_INPUT_LIMIT);
+		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ATTITUDE_INPUT_LIMIT, ATTITUDE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 3.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 2.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
 
@@ -148,7 +143,7 @@ void main(void)
 		#if defined PID_TO_TUNE
 			//pid_update_constants(&x_ang_rate_pid, 2.5 + aux1, x_ang_rate_pid.constants.Ki, x_ang_rate_pid.constants.Kd);
 			//pid_update_constants(&y_ang_rate_pid, 2.5 + aux1, y_ang_rate_pid.constants.Ki, y_ang_rate_pid.constants.Kd);
-			pid_update_constants(&z_ang_rate_pid, 7.0 + aux1, aux2, 0);
+			//pid_update_constants(&z_ang_rate_pid, 7.0 + aux1, aux2, 0);
 		#endif
 
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
@@ -158,12 +153,13 @@ void main(void)
 			pid_reinit(&x_ang_rate_pid);
 			pid_reinit(&y_ang_rate_pid);
 			pid_reinit(&z_ang_rate_pid);
+			pid_reinit(&z_alt_rate_pid);
 		}
 		else
 		{
 			#if defined STABILIZE_MODE
-				float x_rate_req = pid_update(&x_ang_pid,  abs_roll, x_rc_req);
-				float y_rate_req = pid_update(&y_ang_pid, abs_pitch, y_rc_req);
+				float x_rate_req = (x_rc_req -  abs_roll);
+				float y_rate_req = (y_rc_req - abs_pitch);
 			#else
 				float x_rate_req = x_rc_req;
 				float y_rate_req = y_rc_req;
@@ -220,6 +216,14 @@ void main(void)
 				//end_ps = stringify_float(end_ps, mpuInit->gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuInit->gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuInit->gyro.zk); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+
+				//end_ps = stringify_float(end_ps, mpuData.accl.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, mpuData.accl.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, mpuData.accl.zk); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+
+				//end_ps = stringify_float(end_ps, mpuInit->accl.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, mpuInit->accl.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, mpuInit->accl.zk); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, x_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;

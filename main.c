@@ -84,6 +84,9 @@ void main(void)
 	// initialize all necessary sensors
 	const MPUdatascaled* mpuInit = mpu_init();
 
+	// initialize MPUdatascaled variable used inside the loop
+	MPUdatascaled mpuData = *mpuInit;
+
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
 		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.4, 0.017, 0.000030, 400);
@@ -103,11 +106,13 @@ void main(void)
 	uint64_t print_iter = 0;
 	char print_str[256];
 
-	float abs_roll = 0;
-	float abs_pitch = 0;
-	float alt_rate = 0;
+	float abs_roll_init  = atanf( mpuInit->accl.yj/mpuInit->accl.zk) * 180 / M_PI;
+	float abs_pitch_init = atanf(-mpuInit->accl.xi/mpuInit->accl.zk) * 180 / M_PI;
 
-	MPUdatascaled mpuData = *mpuInit;
+	float abs_roll  =  abs_roll_init;
+	float abs_pitch = abs_pitch_init;
+
+	float alt_rate = 0;
 
 	while(1)
 	{
@@ -124,9 +129,9 @@ void main(void)
 		sum(&(mpuData.gyro), &(mpuData.gyro), &(mpuTemp.gyro));
 
 		abs_roll  = (abs_roll  + mpuData.gyro.xi * time_delta_in_seconds) * (GYRO_ACCL_MIX)
-		+ ((atanf( mpuData.accl.yj/mpuData.accl.zk) - atanf( mpuInit->accl.yj/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
+		+ (atanf( mpuData.accl.yj/mpuData.accl.zk) * 180/M_PI) * (1.0 - GYRO_ACCL_MIX);
 		abs_pitch = (abs_pitch + mpuData.gyro.yj * time_delta_in_seconds) * (GYRO_ACCL_MIX)
-		+ ((atanf(-mpuData.accl.xi/mpuData.accl.zk) - atanf(-mpuInit->accl.xi/mpuInit->accl.zk)) * 180 / M_PI) * (1.0 - GYRO_ACCL_MIX);
+		+ (atanf(-mpuData.accl.xi/mpuData.accl.zk) * 180/M_PI) * (1.0 - GYRO_ACCL_MIX);
 
 		uint32_t chan_ret[6];
 		int is_rc_active = get_rc_channels(chan_ret);
@@ -162,8 +167,8 @@ void main(void)
 		else
 		{
 			#if defined STABILIZE_MODE
-				float x_rate_req = aux1 * insensitivity_limit((x_rc_req -  abs_roll), STABILIZATION_SENSITIVITY);
-				float y_rate_req = aux1 * insensitivity_limit((y_rc_req - abs_pitch), STABILIZATION_SENSITIVITY);
+				float x_rate_req = aux1 * insensitivity_limit((x_rc_req - (abs_roll  -  abs_roll_init)), STABILIZATION_SENSITIVITY);
+				float y_rate_req = aux1 * insensitivity_limit((y_rc_req - (abs_pitch - abs_pitch_init)), STABILIZATION_SENSITIVITY);
 			#else
 				float x_rate_req = x_rc_req;
 				float y_rate_req = y_rc_req;

@@ -6,7 +6,7 @@ OC:=arm-none-eabi-objcopy
 USE_NOHOST:=--specs=nosys.specs
 
 # specify the instruction set to use and the cpu (can not change this)
-ARCH_FLAGS:=-mcpu=cortex-m3 -mthumb
+ARCH_FLAGS:=-mthumb -mcpu=cortex-m3
 # optimization for code size, use -O(0,1,2,3) for execution performance
 OPTIMIZATION:=-Os
 # the final compiler flags
@@ -17,8 +17,10 @@ CCFLAGS:=$(ARCH_FLAGS) ${OPTIMIZATION} -I. -fsingle-precision-constant -flto -ff
 MAP:=-Map=main.map
 # introduce the path to the linker script and the name of the linker script
 LDSCRIPTS:=-L. -T gcc.ld
+# remove unused function and data sections
+GC:=-Wl,--gc-sections
 #the final linker flags
-LDFLAGS:=$(LDSCRIPTS)
+LDFLAGS:=$(LDSCRIPTS) $(GC)
 
 # libraries
 LIB:=-lm
@@ -46,7 +48,7 @@ startup_ARMCM3.o : startup_ARMCM3.S
 
 # generate final elf by linking all the object files
 main.elf : startup_ARMCM3.o $(OBJECTS)
-	$(LD) $(LDFLAGS) $(USE_NOHOST) $^ -o $@ $(LIB)
+	$(LD) $(ARCH_FLAGS) $(LDFLAGS) $(USE_NOHOST) $^ -o $@ $(LIB)
 
 # convert to hex or binary that can be transfered by the corresponding uploader driver
 main.bin : main.elf

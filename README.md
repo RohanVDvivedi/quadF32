@@ -26,5 +26,5 @@
 ### connections (from microcontroller)
  * I2c1 {PB6, PB7} -> GY86 sensor {SCL, SDA}
  * UART1 {PA10, PA9} -> UART debug port {RX, TX}
- * {PA0, PA1, PA2, PA3, PA4, PA5} -> RC receiver
+ * {PB10, PB11, PB12, PB13, PB14, PB15} -> RC receiver
  * {PA0, PA1, PA2, PA3} -> PWM to ESCs of corresponding motors (Left Front, Right Front, Left Back, Right Back) of Quadcopter

@@ -32,3 +32,7 @@
 ### PCB designs
  * You will find the .sch and .brd, QuadF32 flight controller board designs in the Eagle_CAD folder.
  * It would also include a generated .cam file that I used for building my board, I would request you to use a different cam file provided by your pcb manufacturer.
+ * The folder also does include .lbr library for the stm32f103 module, that I am using.
+
+### Third party acknowledgements
+ * (STM32F103-c8t6 eagle cad library)[https://os.mbed.com/users/hudakz/code/STM32F103C8T6_Hello/file/accb2c83a007/mbed-STM32F103C8T6.lib/]

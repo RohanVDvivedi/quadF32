@@ -35,4 +35,4 @@
  * The folder also does include .lbr library for the stm32f103 module, that I am using.
 
 ### Third party acknowledgements
- * (STM32F103-c8t6 eagle cad library)[https://os.mbed.com/users/hudakz/code/STM32F103C8T6_Hello/file/accb2c83a007/mbed-STM32F103C8T6.lib/]
+ * [STM32F103-c8t6 eagle cad library](https://os.mbed.com/users/hudakz/code/STM32F103C8T6_Hello/file/accb2c83a007/mbed-STM32F103C8T6.lib/)

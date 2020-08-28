@@ -28,3 +28,7 @@
  * UART1 {PA10, PA9} -> UART debug port {RX, TX}
  * {PB10, PB11, PB12, PB13, PB14, PB15} -> RC receiver
  * {PA0, PA1, PA2, PA3} -> PWM to ESCs of corresponding motors (Left Front, Right Front, Left Back, Right Back) of Quadcopter
+ 
+### PCB designs
+ * You will find the .sch and .brd, QuadF32 flight controller board designs in the Eagle_CAD folder.
+ * It would also include a generated .cam file that I used for building my board, I would request you to use a different cam file provided by your pcb manufacturer.

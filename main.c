@@ -141,17 +141,17 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ATTITUDE_INPUT_LIMIT, ATTITUDE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 3.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 1.2);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
-		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.02);
+		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.008);
 
 		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
 		y_rc_req = insensitivity_limit(y_rc_req, 0.1);
 		z_rc_req = insensitivity_limit(z_rc_req, 2.0);
 
 		#if defined PID_TO_TUNE
-			//pid_update_constants(&x_ang_rate_pid, 2.5 + aux1, x_ang_rate_pid.constants.Ki, x_ang_rate_pid.constants.Kd);
-			//pid_update_constants(&y_ang_rate_pid, 2.5 + aux1, y_ang_rate_pid.constants.Ki, y_ang_rate_pid.constants.Kd);
+			pid_update_constants(&x_ang_rate_pid, 2.4 + aux1, 0.017 + aux2, x_ang_rate_pid.constants.Kd);
+			pid_update_constants(&y_ang_rate_pid, 2.4 + aux1, 0.017 + aux2, y_ang_rate_pid.constants.Kd);
 			//pid_update_constants(&z_ang_rate_pid, 7.0 + aux1, aux2, 0);
 		#endif
 
@@ -215,8 +215,8 @@ void main(void)
 				//end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -237,8 +237,8 @@ void main(void)
 				//end_ps = stringify_float(end_ps, x_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, x_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;

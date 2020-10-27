@@ -28,8 +28,8 @@
 #define THROTTLE_PID_ACTIVATE 		200.0
 #define THROTTLE_MAX_VALUE			800.0
 
-#define ATTITUDE_INPUT_LIMIT		80.0
-#define ANGULAR_RATE_INPUT_LIMIT	80.0
+#define ATTITUDE_INPUT_LIMIT		100.0
+#define ANGULAR_RATE_INPUT_LIMIT	100.0
 
 #define MOTOR_MIN_PWM 				110.0
 #define MOTOR_MAX_PWM 				990.0
@@ -89,8 +89,8 @@ void main(void)
 
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.7, 0.015, 0.000035, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.7, 0.015, 0.000035, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.7, 0.015, 0.000036, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.7, 0.015, 0.000036, 400);
 		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.2, 0.04, 0.000065, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);

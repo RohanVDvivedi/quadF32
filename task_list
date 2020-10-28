@@ -1,0 +1,5 @@
+ * add angle based attitude controller
+ * sensor fusion (gyro accle and magn) to get precise quaternion
+ * get attitude and z axis rotations from the derieved quaternion
+ * sensor fusion (quaternion, accl and baro) to get altitude
+ * velocity based controller for altitude (instead of throttle)

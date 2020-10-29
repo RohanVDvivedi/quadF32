@@ -1,4 +1,5 @@
 # Flight controller using STM32F103
+[Documentation and demonstration video link](https://youtu.be/UyUF_jVTML4)
 
 ### setup requirements
 (for programming stm32f103 microcontroller)

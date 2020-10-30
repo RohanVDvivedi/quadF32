@@ -89,8 +89,8 @@ void main(void)
 
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.9, 0.013, 0.000037, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.9, 0.013, 0.000037, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 3.1, 0.013, 0.000036, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 3.1, 0.013, 0.000036, 400);
 		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.0, 0.045, 0.000055, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
@@ -157,6 +157,16 @@ void main(void)
 
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
 
+		#if defined STABILIZE_MODE
+			float x_rate_req = aux1 * insensitivity_limit((x_rc_req - (abs_roll  /*-  abs_roll_init*/)), STABILIZATION_SENSITIVITY);
+			float y_rate_req = aux1 * insensitivity_limit((y_rc_req - (abs_pitch /*- abs_pitch_init*/)), STABILIZATION_SENSITIVITY);
+		#else
+			float x_rate_req = x_rc_req;
+			float y_rate_req = y_rc_req;
+		#endif
+
+		float z_rate_req = z_rc_req;
+
 		if(throttle < THROTTLE_PID_ACTIVATE)
 		{
 			pid_reinit(&x_ang_rate_pid);
@@ -166,16 +176,6 @@ void main(void)
 		}
 		else
 		{
-			#if defined STABILIZE_MODE
-				float x_rate_req = aux1 * insensitivity_limit((x_rc_req - (abs_roll  /*-  abs_roll_init*/)), STABILIZATION_SENSITIVITY);
-				float y_rate_req = aux1 * insensitivity_limit((y_rc_req - (abs_pitch /*- abs_pitch_init*/)), STABILIZATION_SENSITIVITY);
-			#else
-				float x_rate_req = x_rc_req;
-				float y_rate_req = y_rc_req;
-			#endif
-
-			float z_rate_req = z_rc_req;
-
 			float x_motor_corr = pid_update(&x_ang_rate_pid, mpuData.gyro.xi, x_rate_req);
 			float y_motor_corr = pid_update(&y_ang_rate_pid, mpuData.gyro.yj, y_rate_req);
 			float z_motor_corr = pid_update(&z_ang_rate_pid, mpuData.gyro.zk, z_rate_req);
@@ -215,8 +215,8 @@ void main(void)
 				//end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, mpuData.gyro.xi); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuData.gyro.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -234,17 +234,14 @@ void main(void)
 				//end_ps = stringify_float(end_ps, mpuInit->accl.yj); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, mpuInit->accl.zk); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, x_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, y_motor_corr); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-
 				//end_ps = stringify_float(end_ps, abs_roll); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, abs_pitch); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, x_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_rc_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, x_rate_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, y_rate_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, x_rate_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, y_rate_req); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				
 				//end_ps = stringify_float(end_ps, time_delta_in_seconds); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 

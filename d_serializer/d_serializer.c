@@ -214,6 +214,7 @@ char* stringify_float(char* num, float f)
 		*num = 'n';num++;
 		*num = 'a';num++;
 		*num = 'n';num++;
+		return num;
 	}
 
 	if(f < 0)

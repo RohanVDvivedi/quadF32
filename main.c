@@ -89,9 +89,9 @@ void main(void)
 
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 3.0, 0.014, 0.000034, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 3.0, 0.014, 0.000034, 400);
-		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.0, 0.045, 0.000055, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 3.05, 0.014, 0.000031, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 3.05, 0.014, 0.000031, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.50, 0.035, 0.000045, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
 	// flyable values

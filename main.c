@@ -153,8 +153,8 @@ void main(void)
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
 
 		#if defined STABILIZE_MODE
-			float x_rate_req = aux1 * insensitivity_limit((x_rc_req - (abs_roll  /*-  abs_roll_init*/)), STABILIZATION_SENSITIVITY);
-			float y_rate_req = aux1 * insensitivity_limit((y_rc_req - (abs_pitch /*- abs_pitch_init*/)), STABILIZATION_SENSITIVITY);
+			float x_rate_req = aux1 * insensitivity_limit((x_rc_req -  abs_roll), STABILIZATION_SENSITIVITY);
+			float y_rate_req = aux1 * insensitivity_limit((y_rc_req - abs_pitch), STABILIZATION_SENSITIVITY);
 		#else
 			float x_rate_req = x_rc_req;
 			float y_rate_req = y_rc_req;

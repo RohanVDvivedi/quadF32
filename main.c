@@ -121,12 +121,7 @@ void main(void)
 
 		GPIOC->GPIO_ODR ^= (1 << 13);
 
-		MPUdatascaled mpuTemp;
-		get_scaled_MPUdata(&mpuTemp);
-		mpuData.accl = mpuTemp.accl;
-		multiply_scalar(&(mpuTemp.gyro), &(mpuTemp.gyro), 0.3);
-		multiply_scalar(&(mpuData.gyro), &(mpuData.gyro), 0.7);
-		sum(&(mpuData.gyro), &(mpuData.gyro), &(mpuTemp.gyro));
+		get_scaled_MPUdata(&mpuData);
 
 		abs_roll  = (abs_roll  + mpuData.gyro.xi * time_delta_in_seconds) * (GYRO_ACCL_MIX)
 		+ (atanf( mpuData.accl.yj/mpuData.accl.zk) * 180/M_PI) * (1.0 - GYRO_ACCL_MIX);

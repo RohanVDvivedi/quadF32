@@ -28,8 +28,12 @@
 #define THROTTLE_PID_ACTIVATE 		200.0
 #define THROTTLE_MAX_VALUE			800.0
 
-#define ATTITUDE_INPUT_LIMIT		100.0
-#define ANGULAR_RATE_INPUT_LIMIT	100.0
+#ifndef STABILIZATION_SENSITIVITY
+	#define ATTITUDE_INPUT_LIMIT	 30.0
+#else	// it is a rate controlled quadcopter
+	#define ATTITUDE_INPUT_LIMIT	170.0
+#endif
+#define ANGULAR_RATE_INPUT_LIMIT	170.0
 
 #define MOTOR_MIN_PWM 				110.0
 #define MOTOR_MAX_PWM 				990.0
@@ -89,9 +93,9 @@ void main(void)
 
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.5, 0.013, 0.000009, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.5, 0.013, 0.000009, 400);
-		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.7, 0.036, 0.000017, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.5, 0.010, 0.00002, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.5, 0.010, 0.00002, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.7, 0.040, 0.00004, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
 	// flyable values

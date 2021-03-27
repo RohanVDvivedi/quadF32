@@ -15,11 +15,11 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-//#define STABILIZE_MODE
+#define STABILIZE_MODE
 #define STABILIZATION_SENSITIVITY	0.3
 
-#define map(val, a_min, a_max, b_min, b_max)	b_min + ((((float)val) - a_min) * (b_max - b_min)) / (a_max - a_min)
-#define insensitivity_limit(val, limit)			((fabsf(val) <= fabsf(limit)) ? 0 : val)
+#define map(val, a_min, a_max, b_min, b_max)	(b_min) + ((((float)(val)) - (a_min)) * ((b_max) - (b_min))) / ((a_max) - (a_min))
+#define insensitivity_limit(val, limit)			((fabsf((val)) <= fabsf(limit)) ? 0 : (val))
 
 #define GYRO_ACCL_MIX     			0.98
 #define LOOP_EVERY_MICROS 			2500

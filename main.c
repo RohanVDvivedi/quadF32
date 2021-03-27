@@ -15,7 +15,7 @@
 #include<bldc/quad_bldc.h>
 #include<rc_receiver/rc_receiver.h>
 
-#define STABILIZE_MODE
+//#define STABILIZE_MODE
 
 #define map(val, a_min, a_max, b_min, b_max)	(b_min) + ((((float)(val)) - (a_min)) * ((b_max) - (b_min))) / ((a_max) - (a_min))
 
@@ -26,7 +26,7 @@
 #define THROTTLE_PID_ACTIVATE 		200.0
 #define THROTTLE_MAX_VALUE			800.0
 
-#ifndef STABILIZATION_SENSITIVITY
+#ifdef STABILIZE_MODE
 	#define ATTITUDE_INPUT_LIMIT	 30.0
 #else	// it is a rate controlled quadcopter
 	#define ATTITUDE_INPUT_LIMIT	170.0
@@ -91,9 +91,9 @@ void main(void)
 
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.5, 0.010, 0.00002, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.5, 0.010, 0.00002, 400);
-		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.7, 0.040, 0.00004, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.7, 0.015, 0.005, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.7, 0.015, 0.005, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.7, 0.035, 0.012, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
 	// flyable values

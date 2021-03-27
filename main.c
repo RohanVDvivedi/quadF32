@@ -151,8 +151,8 @@ void main(void)
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
 
 		#if defined STABILIZE_MODE
-			float x_rate_req = aux1 * (x_rc_req -  abs_roll);
-			float y_rate_req = aux1 * (y_rc_req - abs_pitch);
+			float x_rate_req = aux1 * (x_rc_req - (abs_roll  -  abs_roll_init));
+			float y_rate_req = aux1 * (y_rc_req - (abs_pitch - abs_pitch_init));
 		#else
 			float x_rate_req = x_rc_req;
 			float y_rate_req = y_rc_req;

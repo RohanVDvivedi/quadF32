@@ -16,10 +16,8 @@
 #include<rc_receiver/rc_receiver.h>
 
 #define STABILIZE_MODE
-#define STABILIZATION_SENSITIVITY	0.3
 
 #define map(val, a_min, a_max, b_min, b_max)	(b_min) + ((((float)(val)) - (a_min)) * ((b_max) - (b_min))) / ((a_max) - (a_min))
-#define insensitivity_limit(val, limit)			((fabsf((val)) <= fabsf(limit)) ? 0 : (val))
 
 #define GYRO_ACCL_MIX     			0.98
 #define LOOP_EVERY_MICROS 			2500
@@ -140,13 +138,9 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ATTITUDE_INPUT_LIMIT, ATTITUDE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 2.5);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 4.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
 		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.000035);
-
-		x_rc_req = insensitivity_limit(x_rc_req, 0.1);
-		y_rc_req = insensitivity_limit(y_rc_req, 0.1);
-		z_rc_req = insensitivity_limit(z_rc_req, 2.0);
 
 		#if defined PID_TO_TUNE
 			//pid_update_constants(&x_ang_rate_pid, 1.5 + aux1, 0.010, 0.000010 + aux2);
@@ -157,8 +151,8 @@ void main(void)
 		float motor_LF = throttle, motor_RF = throttle, motor_LB = throttle, motor_RB = throttle;
 
 		#if defined STABILIZE_MODE
-			float x_rate_req = aux1 * insensitivity_limit((x_rc_req -  abs_roll), STABILIZATION_SENSITIVITY);
-			float y_rate_req = aux1 * insensitivity_limit((y_rc_req - abs_pitch), STABILIZATION_SENSITIVITY);
+			float x_rate_req = aux1 * (x_rc_req -  abs_roll);
+			float y_rate_req = aux1 * (y_rc_req - abs_pitch);
 		#else
 			float x_rate_req = x_rc_req;
 			float y_rate_req = y_rc_req;

@@ -91,9 +91,9 @@ void main(void)
 
 	// initialize pid variables
 	// angular rate control pids, these cause differential motor corrections to attain required angular rates along local axis
-		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 2.8, 0.015, 0.002, 400);
-		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 2.8, 0.015, 0.002, 400);
-		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 5.6, 0.030, 0.004, 400);
+		pid_state x_ang_rate_pid; pid_init(&x_ang_rate_pid, 3.4, 0.015, 0.002, 400);
+		pid_state y_ang_rate_pid; pid_init(&y_ang_rate_pid, 3.4, 0.015, 0.002, 400);
+		pid_state z_ang_rate_pid; pid_init(&z_ang_rate_pid, 6.8, 0.030, 0.004, 400);
 	// altitude rate pid will mainly work to make 0 rate of change of altitude
 		pid_state z_alt_rate_pid; pid_init(&z_alt_rate_pid, 0, 0, 0, 400);
 	// flyable values
@@ -138,13 +138,13 @@ void main(void)
 		float y_rc_req = map(chan_ret[4], 0.0, 1000.0, -ATTITUDE_INPUT_LIMIT, ATTITUDE_INPUT_LIMIT);
 		float z_rc_req = map(chan_ret[2], 0.0, 1000.0, ANGULAR_RATE_INPUT_LIMIT, -ANGULAR_RATE_INPUT_LIMIT);
 			chan_ret[1] = (chan_ret[1] < 3) ? 0 : chan_ret[1];
-		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 4.0);
+		float aux1 = map(chan_ret[1], 0.0, 1000.0, 0.0, 10.0);
 			chan_ret[0] = (chan_ret[0] < 3) ? 0 : chan_ret[0];
-		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 0.000035);
+		float aux2 = map(chan_ret[0], 0.0, 1000.0, 0.0, 40.0);
 
 		#if defined PID_TO_TUNE
-			//pid_update_constants(&x_ang_rate_pid, 1.5 + aux1, 0.010, 0.000010 + aux2);
-			//pid_update_constants(&y_ang_rate_pid, 1.5 + aux1, 0.010, 0.000010 + aux2);
+			pid_update_constants(&x_ang_rate_pid, aux1, 0.00, aux2);
+			pid_update_constants(&y_ang_rate_pid, aux1, 0.00, aux2);
 			//pid_update_constants(&z_ang_rate_pid, 7.0 + aux1, aux2, 0);
 		#endif
 
@@ -208,8 +208,8 @@ void main(void)
 				//end_ps = stringify_integer(end_ps, motor_LB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, motor_RB); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				//end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				//end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux1); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				end_ps = stringify_float(end_ps, aux2); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_integer(end_ps, chan_ret[0]); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, chan_ret[1]); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
@@ -218,9 +218,9 @@ void main(void)
 				//end_ps = stringify_integer(end_ps, chan_ret[4]); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_integer(end_ps, chan_ret[5]); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
-				end_ps = stringify_float(end_ps, x_ang_rate_pid.constants.Kp); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, x_ang_rate_pid.constants.Ki); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
-				end_ps = stringify_float(end_ps, x_ang_rate_pid.constants.Kd); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, x_ang_rate_pid.constants.Kp); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, x_ang_rate_pid.constants.Ki); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
+				//end_ps = stringify_float(end_ps, x_ang_rate_pid.constants.Kd); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 
 				//end_ps = stringify_float(end_ps, y_ang_rate_pid.constants.Kp); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
 				//end_ps = stringify_float(end_ps, y_ang_rate_pid.constants.Ki); *end_ps = ' '; end_ps++; *end_ps = '\t'; end_ps++;
